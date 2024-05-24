@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export default function RequirementSingleCard() {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 py-8 w-full">
       
       <Card>
         <CardHeader>
