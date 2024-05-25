@@ -82,18 +82,34 @@ export const PatientMenuLinks = [
 
   export const UserMenuLinks = [
     {
-      name: "Dashboard",
+      name: "Ver documentos",
       link: "/user/dashboard",
     },
     
     {
-      name: "Requisitos",
-      link: "/user/requirement",
+      name: "Crear nuevo documento",
+      link: "/user/requirement/new",
+    },
+    {
+      name: "Crear nueva plantilla",
+      link: "",
+    },
+    {
+      name: "Ir a foros",
+      link: "",
+    },
+    {
+      name: "Cambiar de sistema",
+      link: "",
     },
     
     {
       name: "Mi cuenta",
       link: "/user/profile",
+    },
+    {
+      name: "Salir",
+      link: "",
     },
     
   ];

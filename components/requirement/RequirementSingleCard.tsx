@@ -15,7 +15,7 @@ export default function RequirementSingleCard() {
           <Link className="grid gap-4" href="/user/requirement/new">
             <Button variant="outline">Crear Requisito</Button></Link> 
 
-          <Link className="grid gap-4" href="/user/requirement/transactions">
+          <Link className="grid gap-4" href="/user/requirement/requirements">
             <Button variant="outline">Ver Requisito</Button></Link>
 
           <Link className="grid gap-4" href="/user/requirement/delete">
