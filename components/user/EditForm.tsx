@@ -1,5 +1,5 @@
 'use client'
-import { useMutation, useQuery, ApolloProvider } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 //import { UPDATE_PATIENT_MUTATION } from "../apollo/mutations";
 //import { GET_PATIENT_QUERY } from "../apollo/queries"; // assuming you have a query to get patient details
 import { Loader2 } from "lucide-react";
-import client from "@/components/apollo/ApolloClient";
 
 interface EditFormProps {
   rut: string;
@@ -28,7 +27,7 @@ const  region= "Some Region"
 const  commune= "Some Commune"
     
 
-function EditForm({ rut }: EditFormProps) {
+export default function EditForm({ rut }: EditFormProps) {
   /*const { data: patientData, loading: patientLoading } = useQuery(GET_PATIENT_QUERY, {
     variables: { rut } 
   });*/
@@ -76,9 +75,7 @@ function EditForm({ rut }: EditFormProps) {
   }, [patientData]);
 
   
-  const [updatePatient] = useMutation(UPDATE_PATIENT_MUTATION, {
-    client,
-  });*/
+  const [updatePatient] = useMutation(UPDATE_PATIENT_MUTATION);*/
   
   const onSubmit = async (e: React.FormEvent) => {/*
     e.preventDefault();
@@ -297,11 +294,4 @@ function EditForm({ rut }: EditFormProps) {
   );
 }
 
-const EditFormComponent = ({ rut }: EditFormProps) => (
-  <ApolloProvider client={client}>
-    <EditForm rut={rut} />
-  </ApolloProvider>
-);
 
-EditFormComponent.displayName = "EditFormComponent";
-export default EditFormComponent;
