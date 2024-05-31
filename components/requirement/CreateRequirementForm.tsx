@@ -1,106 +1,85 @@
-'use client'
-import React, { useState } from 'react'
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AddIcon } from '@chakra-ui/icons';
-import { on } from 'events';
+'use client';
+import { useState, ChangeEvent } from 'react';
+import { Box, Button, FormControl, FormLabel, Input, VStack } from '@chakra-ui/react';
 
-function CreateRequirementForm(){
-    const [documentName, setDocumentName] = useState('')  
-    const [alertMessage, setAlertMessage] = useState("");
-    const [alertType, setAlertType] = useState("");
-    const [loading, setLoading] = useState(false);
-
-    const [requirements, setRequirements] = useState<string[]>([]);
-    const [newRequirement, setNewRequirement] = useState('');
-    const addRequirement = () => {
-      setRequirements([...requirements, newRequirement]);
-      setNewRequirement('');
-  }
-    
-    const onSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      console.log("Document name: ", documentName);
-    }
-
-    return (
-        <div className="space-y-8 w-[400px] ">
-          <form onSubmit={onSubmit} className="space-y-8 ">
-            <div className="grid w-full items-center gap-1.5">
-              <Label className="text-gray-900 dark:text-gray-50" htmlFor="rut">
-                Nombre documento de requisitos
-              </Label>
-              <Input
-                className="text-[#26313c]"
-                required
-                value={documentName}
-                onChange={(e) => setDocumentName(e.target.value)}
-                id="documentName"
-                type="text"
-                placeholder="Ingrese el nombre del documento"
-                maxLength={50}
-                minLength={3}
-              />
-            </div>
-            <div className="grid w-full items-center gap-1.5">
-              <Label className="text-gray-900 dark:text-gray-50" htmlFor="rut">
-                Requisitos
-              </Label>
-              <Input
-                className="text-[#26313c]"
-                value={newRequirement}
-                onChange={(e) => setNewRequirement(e.target.value)}
-                id="newRequirement"
-                type="text"
-                placeholder="Ingrese un nuevo requisito"
-                maxLength={30}
-                minLength={3}
-              />
-              
-              <Button type="button" onClick={addRequirement} disabled={!newRequirement}> 
-                <AddIcon className="h-6 w-6" />
-              </Button>
-              {requirements.map((requirement, index) => (
-                <div key={index}>{requirement}</div>
-              ))}
-            </div>
-            <div className="w-full">
-              
-              <Button
-                type="submit"
-                className="w-full"
-                size="lg"
-                disabled={loading || !documentName || requirements.length === 0}
-                onClick={onSubmit}
-              >
-                {loading ? (
-                  <span className="flex items-center">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Registrando nuevo documento de requiaitos
-                  </span>
-                ) : (
-                  "Submit"
-                )}
-              </Button>
-            </div>
-          </form>
-          {alertMessage && (
-            <div className="fixed bottom-4 right-4">
-              <Alert
-                variant={alertType === "big error" ? "destructive" : "default"}
-              >
-                <AlertTitle>
-                  {alertType === "big error"
-                    ? "¡Oops, ocurrió un error!"
-                    : "¡Registro exitoso!"}
-                </AlertTitle>
-                <AlertDescription>{alertMessage}</AlertDescription>
-              </Alert>
-            </div>
-          )}
-        </div>
-      )
+interface Requirement {
+  title: string;
+  content: string;
 }
+
+const CreateRequirementForm: React.FC = () => {
+  const [documentTitle, setDocumentTitle] = useState<string>('');
+  const [requirements, setRequirements] = useState<Requirement[]>([{ title: '', content: '' }]);
+
+  const handleAddRequirement = () => {
+    setRequirements([...requirements, { title: '', content: '' }]);
+  };
+
+  const handleRequirementChange = (index: number, field: keyof Requirement, value: string) => {
+    const newRequirements = [...requirements];
+    newRequirements[index][field] = value;
+    setRequirements(newRequirements);
+  };
+
+  const handleSubmit = () => {
+    const formData = {
+      documentTitle,
+      requirements,
+    };
+    // Manejar la lógica de envío de datos aquí
+    console.log(formData);
+  };
+
+  const handleDocumentTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setDocumentTitle(e.target.value);
+  };
+
+  const handleInputChange = (index: number, field: keyof Requirement) => (e: ChangeEvent<HTMLInputElement>) => {
+    handleRequirementChange(index, field, e.target.value);
+  };
+
+  return (
+    <Box p={5} borderWidth={1} borderRadius={5} boxShadow="lg">
+      <VStack spacing={4} align="stretch">
+        <FormControl id="document-title">
+          <FormLabel>Título del documento</FormLabel>
+          <Input 
+            type="text" 
+            value={documentTitle} 
+            onChange={handleDocumentTitleChange} 
+          />
+        </FormControl>
+        {requirements.map((requirement, index) => (
+          <Box key={index} borderWidth={1} borderRadius={5} p={4} boxShadow="sm">
+            <FormControl id={`requirement-title-${index}`}>
+              <FormLabel>Título de requisito</FormLabel>
+              <Input 
+                type="text" 
+                value={requirement.title} 
+                onChange={handleInputChange(index, 'title')} 
+              />
+            </FormControl>
+            <FormControl id={`requirement-content-${index}`}>
+              <FormLabel>Contenido de Requisito</FormLabel>
+              <Input 
+                type="text" 
+                value={requirement.content} 
+                onChange={handleInputChange(index, 'content')} 
+              />
+            </FormControl>
+          </Box>
+        ))}
+        {requirements[requirements.length - 1].title && requirements[requirements.length - 1].content && (
+          <Button onClick={handleAddRequirement} colorScheme="teal">
+            Añadir más requisitos
+          </Button>
+        )}
+        <Button onClick={handleSubmit} colorScheme="blue">
+          Finalizar
+        </Button>
+      </VStack>
+    </Box>
+  );
+};
+
 export default CreateRequirementForm;
