@@ -92,7 +92,7 @@ export const PatientMenuLinks = [
     },
     {
       name: "Crear nueva plantilla",
-      link: "",
+      link: "/user/template/new",
     },
     {
       name: "Ir a foros",
