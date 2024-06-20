@@ -1,11 +1,9 @@
 'use client';
-import { Requirement } from "@/interfaces/Requirement";
 import { Document } from "@/interfaces/Document";
 import DataTable from "react-data-table-component";
-import { Forum } from "@/interfaces/Forum";
-import { Template } from "@/interfaces/Template";
-import { Version } from "@/interfaces/Version";
 import { useRouter } from 'next/navigation'
+import { useQuery } from "@apollo/client";
+import { GET_ALL_DOCUMENTS } from "@/components/apollo/queries";
 
 const customStyles = {
     rows: {
@@ -18,62 +16,54 @@ const customStyles = {
     },
 };
 
-
-// Datos de prueba
-const data: Document[] = [
-    {
-        id: 1,
-        id_user: 1,
-        title: "Documento 01",
-        timestamp: "2021-09-01",
-        //forums: [],
-        //templates: [],
-        //version: [],
-        //requirements: [],
-    },
-    {
-        id: 2,
-        id_user: 2,
-        title: "Documento 02",
-        timestamp: "2021-09-02",
-        //forums: [],
-        //templates: [],
-        //version: [],
-        //requirements: [],
-    },
-
-];
-
 const columns = [
     {
-        name: "Documento ID",
+        name: "ID",
         selector: (row: Document) => row.id,
         sortable: true,
-        grow: 0.4
+        width: "80px"
     },
     {
         name: "Titulo",
         selector: (row: Document) => row.title,
         sortable: true,
+        width: "300px"
     },
     {
         name: "fecha creacion",
         selector: (row: Document) => row.timestamp,
         sortable: true,
-        grow: 0.4
+        width: "180px"
     },
+    {
+        name: "Version",
+        selector: (row: Document) => row.version.version,
+        sortable: true,
+        width: "100px"
+    },
+    {
+        name: "Template",
+        selector: (row: Document) => row.template.title,
+        sortable: true,
+    }
 
 ];
 
 export default function DocumentsTable() {
+    const { data: dataDocuments, loading: loadingDocuments, error: errorDocuments, refetch } = useQuery(GET_ALL_DOCUMENTS)
+    console.log(dataDocuments)
+
     const router = useRouter()
+
+    if (loadingDocuments) return <p>Loading...</p>
+    if (errorDocuments) return <p>Error...</p>
 
     return (
         <div className="space-y-8 w-[1000px] ">
             <DataTable
                 title="Documentos"
                 columns={columns}
-                data={data}
+                data={dataDocuments?.getAllDocument}
                 pagination
                 onRowClicked={row => router.push(`/user/dashboard/document/${row.id}`)}
                 customStyles={customStyles}

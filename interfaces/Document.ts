@@ -5,11 +5,12 @@ import { Version } from '@/interfaces/Version';
 
 export interface Document {
     id: number;
+    id_project: number;
     id_user: number;
     title: string;
     timestamp: string;
     //forums: Forum[];
-    //templates: Template;
-    //version: Version
+    template: Template;
+    version: Version
     //requirements: Requirement[];
 }
