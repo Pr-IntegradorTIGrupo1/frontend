@@ -42,13 +42,17 @@ const CreateRequirementForm: React.FC = () => {
   const [templates, setTemplates] = useState<Template[]>([]);
 
   // Call API to fetch templates
-  const { data: dataTemplates, loading: loadingTemplates, error: templatesError } = useQuery(GET_ALL_TEMPLATES);
+  const { data: dataTemplates, loading: loadingTemplates, error: templatesError, refetch } = useQuery(GET_ALL_TEMPLATES);
 
   useEffect(() => {
     if (dataTemplates) {
       setTemplates(dataTemplates.getAllTemplate);
     }
   }, [dataTemplates]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const initialValues: FormValues = {
     project: '',

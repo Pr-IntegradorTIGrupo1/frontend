@@ -3,7 +3,7 @@ import { Document } from "@/interfaces/Document";
 import DataTable from "react-data-table-component";
 import { useRouter } from 'next/navigation'
 import { useQuery } from "@apollo/client";
-import { GET_ALL_DOCUMENTS } from "@/components/apollo/queries";
+import { GET_ALL_DOCUMENTS_LAST_VERSION_QUERY } from "@/components/apollo/queries";
 
 const customStyles = {
     rows: {
@@ -31,7 +31,7 @@ const columns = [
     },
     {
         name: "fecha creacion",
-        selector: (row: Document) => row.timestamp,
+        selector: (row: Document) => new Date(row.timestamp).toLocaleString(),
         sortable: true,
         width: "180px"
     },
@@ -50,7 +50,7 @@ const columns = [
 ];
 
 export default function DocumentsTable() {
-    const { data: dataDocuments, loading: loadingDocuments, error: errorDocuments, refetch } = useQuery(GET_ALL_DOCUMENTS)
+    const { data: dataDocuments, loading: loadingDocuments, error: errorDocuments, refetch } = useQuery(GET_ALL_DOCUMENTS_LAST_VERSION_QUERY)
     console.log(dataDocuments)
 
     const router = useRouter()
@@ -63,7 +63,7 @@ export default function DocumentsTable() {
             <DataTable
                 title="Documentos"
                 columns={columns}
-                data={dataDocuments?.getAllDocument}
+                data={dataDocuments?.getAllDocumentsLastVersion}
                 pagination
                 onRowClicked={row => router.push(`/user/dashboard/document/${row.id}`)}
                 customStyles={customStyles}

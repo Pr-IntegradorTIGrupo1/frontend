@@ -10,9 +10,9 @@ export const GET_ALL_TEMPLATES = gql`
     }
 `;
 
-export const GET_ALL_DOCUMENTS = gql`
+export const GET_ALL_DOCUMENTS_LAST_VERSION_QUERY = gql`
     query GetAllDocuments {
-        getAllDocument {
+        getAllDocumentsLastVersion {
             id
             id_project
             id_user
