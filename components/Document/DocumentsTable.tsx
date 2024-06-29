@@ -4,6 +4,8 @@ import DataTable from "react-data-table-component";
 import { useRouter } from 'next/navigation'
 import { useQuery } from "@apollo/client";
 import { GET_ALL_DOCUMENTS_LAST_VERSION_QUERY } from "@/components/apollo/queries";
+import { useEffect } from 'react';
+
 
 const customStyles = {
     rows: {
@@ -52,6 +54,10 @@ const columns = [
 export default function DocumentsTable() {
     const { data: dataDocuments, loading: loadingDocuments, error: errorDocuments, refetch } = useQuery(GET_ALL_DOCUMENTS_LAST_VERSION_QUERY)
     console.log(dataDocuments)
+
+    useEffect(() => {
+        refetch();
+      }, [refetch]);
 
     const router = useRouter()
 
