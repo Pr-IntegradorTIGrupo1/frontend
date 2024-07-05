@@ -113,5 +113,16 @@ export const PatientMenuLinks = [
     },
     
   ];
+
+  export const subMenuLinks = [
+    {
+      name: "Versiones de Documentos",
+      link: "/user/versionControl",
+    },
+    {
+      name: "Sub-Item 2",
+      link: "/sub-item-2",
+    },
+  ];
   
   
