@@ -2,10 +2,11 @@
 import { useState, useEffect } from 'react';
 import { Box, Button, FormControl, FormLabel, Input, VStack, IconButton, Text, Stack, Center, InputGroup, InputLeftAddon, FormErrorMessage } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
-import { CREATE_TEMPLATE_MUTATION } from '../apollo/mutations';
-import { useMutation } from '@apollo/client';
+import { GET_DOCUMENT_BY_ID } from '../apollo/queries';
+import { useQuery } from '@apollo/client';
+import { usePathname } from 'next/navigation';
+
 import Swal from 'sweetalert2';
-import { documentoRequisito } from '@/app/user/versionControl/fakeData/documentoRequisito';
 
 interface RequirementContent {
   key: string;
@@ -21,22 +22,63 @@ interface Requirement {
   isNew: boolean;
 }
 
+type Document = {
+  id: number;
+  id_document: string;
+  id_project: number;
+  id_user: number;
+  title: string;
+  timestamp: string;
+  read_only: boolean;
+  is_active: boolean;
+  requirements: {
+    id: number;
+    content: string;
+  }[];
+  version: DocumentVersion;
+};
+
+type DocumentVersion = {
+  version: number;
+  last_version: boolean;
+};
+
 const CreateNewVersion: React.FC = () => {
-  const [createTemplate] = useMutation(CREATE_TEMPLATE_MUTATION);
-  const [version, setVersion] = useState<string>(documentoRequisito.version);
-  const [versionTitle, setVersionTitle] = useState<string>(documentoRequisito.title);
-  const [requirements, setRequirements] = useState<Requirement[]>(documentoRequisito.requirements.map((req, index) => ({
-    index: index + 1,
-    content: req.content.map(item => {
-      const [key, value] = item.split(': ').map(str => str.trim());
-      return { key, value, disabled: false, isNew: false };
-    }),
-    disabled: false,
-    isNew: false
-  })));
+  const [version, setVersion] = useState<string>('');
+  const [versionTitle, setVersionTitle] = useState<string>('');
+  const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [sameStructure, setSameStructure] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [versionError, setVersionError] = useState<string | null>(null);
+
+  const documentId = parseInt(usePathname().split('/')[3]);
+  console.log(documentId);
+
+  // Gestion de documento en la vista
+  const { data: RequirementDocument, loading: loadingDocument, error: documentError } = useQuery<{ getDocument: Document }>(GET_DOCUMENT_BY_ID, { variables: { id: documentId } });
+  const [documento, setDocumento] = useState<Document | null>(null);
+
+  useEffect(() => {
+    if (RequirementDocument) {
+      console.log(RequirementDocument);
+      setDocumento(RequirementDocument.getDocument);
+      const { version, title, requirements } = RequirementDocument.getDocument;
+      setVersion(version.version.toString());
+      setVersionTitle(title);
+      setRequirements(requirements.map((req, index) => {
+        const parsedContent = JSON.parse(req.content).content.map((item: string) => {
+          const [key, value] = item.split(': ').map((str: string) => str.trim());
+          return { key, value, disabled: false, isNew: false };
+        });
+        return {
+          index: index + 1,
+          content: parsedContent,
+          disabled: false,
+          isNew: false
+        };
+      }));
+    }
+  }, [RequirementDocument]);
 
   const validateVersion = (version: string) => {
     const versionPattern = /^\d+\.\d+\.\d+$/;

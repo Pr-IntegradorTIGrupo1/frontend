@@ -5,6 +5,7 @@ import { AddIcon, DeleteIcon, DownloadIcon } from '@chakra-ui/icons';
 import { GET_DOCUMENT_BY_ID } from '../apollo/queries';
 import { useQuery } from '@apollo/client';
 import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -33,7 +34,10 @@ type Document = {
 };
 
 const VersionDetail: React.FC = () => {
-  const documentId = 1;
+  const documentId = parseInt(usePathname().split('/')[3]);
+  // const documentId = 1;
+  console.log(documentId);
+  
   const versions = ["1.0.0", "1.1.0"]; // Lista de versiones
   const [selectedVersion, setSelectedVersion] = useState(versions[0]); // Estado para la versión seleccionada
 
