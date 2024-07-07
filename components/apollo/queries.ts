@@ -36,3 +36,25 @@ export const GET_ALL_DOCUMENTS = gql`
         }
     }
 `;
+
+//CONTROL DE VERSIONES
+export const GET_DOCUMENT_BY_ID = gql`
+    query GetDocumentById($id: Int!) {
+        getDocument(id: $id) {
+            id
+            id_project
+            id_user
+            title
+            timestamp
+            version{
+                version
+            }
+            requirements{
+                id
+                content
+
+            }
+        }
+}
+`
+;

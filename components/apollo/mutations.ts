@@ -21,3 +21,13 @@ export const CREATE_DOCUMENT_MUTATION = gql`
         }
     }   
 `;
+
+//CONTROL DE VERSIONES
+export const UPDATE_DOCUMENT_MUTATION = gql`
+    mutation UpdateDocument($input: UpdateDocumentInput!) {
+        updateDocument(input: $input ) {
+            success
+            message
+        }
+    }   
+`;

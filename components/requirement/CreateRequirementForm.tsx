@@ -89,6 +89,8 @@ const CreateRequirementForm: React.FC = () => {
 
     const title = documentTitle;//1) title: String!
     const content = JSON.stringify(formattedData);//2) content: String!
+    console.log(content);
+    
     const id_user = 1; //3) Hardcoded user ID for now
     const projectId = parseInt(selectedProjectId);//4) id_project: Int!
     const templateId = selectedTemplateId;//5) id_template: Int!
