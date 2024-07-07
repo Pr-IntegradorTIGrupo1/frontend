@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Box, FormControl, FormLabel, Input, VStack, Text, Center, Select, Button, Icon, Flex, HStack, Tooltip } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon, DownloadIcon } from '@chakra-ui/icons';
-import { GET_DOCUMENT_BY_ID } from '../apollo/queries';
+import { GET_ALL_VERSIONS_BY_DOCUMENT, GET_DOCUMENT_BY_ID } from '../apollo/queries';
 import { useQuery } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
@@ -16,6 +16,7 @@ type Requirement = {
 };
 
 type DocumentVersion = {
+  id: number;
   version: number;
   last_version: boolean;
 };
@@ -35,14 +36,18 @@ type Document = {
 
 const VersionDetail: React.FC = () => {
   const documentId = parseInt(usePathname().split('/')[3]);
-  // const documentId = 1;
-  console.log(documentId);
-  
-  const versions = ["1.0.0", "1.1.0"]; // Lista de versiones
-  const [selectedVersion, setSelectedVersion] = useState(versions[0]); // Estado para la versión seleccionada
+
+  const [versions, setVersions] = useState<DocumentVersion[]>([]);
+  const [selectedVersion, setSelectedVersion] = useState<number | undefined>(); // Estado para la versión seleccionada
+  const [lastVersion, setLastVersion] = useState<number | undefined>(); // Estado para la última versión
 
   // Gestion de documento en la vista
-  const { data: RequirementDocument, loading: loadingDocument, error: documentError } = useQuery<{ getDocument: Document }>(GET_DOCUMENT_BY_ID, { variables: { id: documentId } });
+  const { data: RequirementDocument, loading: loadingDocument, error: documentError } = 
+        useQuery(GET_DOCUMENT_BY_ID, { variables: { id: documentId } });
+
+  const { data: VersionsDocument, loading: loadingVersions, error: versionsError } = 
+        useQuery(GET_ALL_VERSIONS_BY_DOCUMENT, { variables: { id_document: documentId } });
+
   const [documento, setDocumento] = useState<Document | null>(null);
 
   useEffect(() => {
@@ -50,12 +55,39 @@ const VersionDetail: React.FC = () => {
       console.log(RequirementDocument);
       setDocumento(RequirementDocument.getDocument);
     }
-  }, [RequirementDocument]);
+    if (VersionsDocument) {
+      console.log(VersionsDocument);
+      const versionsData: DocumentVersion[] = VersionsDocument.getAllDocumentsVersions.map((item: { id: number, version: { version: number, last_version: boolean } }) => ({
+        id: item.id,
+        version: item.version.version,
+        last_version: item.version.last_version
+      }));
+      setVersions(versionsData);
+
+      // Encontrar y establecer la última versión
+      const lastVersionData = versionsData.find(v => v.last_version === true);
+      if (lastVersionData) {
+        setLastVersion(lastVersionData.id);
+      }
+
+      if (RequirementDocument) {
+        const initialVersion = versionsData.find(v => v.version === RequirementDocument.getDocument.version.version);
+        if (initialVersion) {
+          setSelectedVersion(initialVersion.version);
+        }
+      }
+    }
+  }, [RequirementDocument, VersionsDocument]);
 
   const router = useRouter();
 
   const handleVersionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedVersion(event.target.value);
+    const selectedVersion = parseInt(event.target.value);
+    setSelectedVersion(selectedVersion);
+    const selectedVersionData = versions.find(version => version.version === selectedVersion);
+    if (selectedVersionData) {
+      router.push(`/user/versionControl/${selectedVersionData.id}/versionDetail`);
+    }
   };
 
   const handleExportPDF = () => {
@@ -91,7 +123,7 @@ const VersionDetail: React.FC = () => {
 
   const handleCreateVersion = () => {
     console.log("Crear nueva versión");
-    router.push(`/user/versionControl/${documentId}/newVersion`);
+    router.push(`/user/versionControl/${lastVersion}/newVersion`);
   };
 
   const handleDeleteVersion = () => {
@@ -109,7 +141,7 @@ const VersionDetail: React.FC = () => {
                 <FormLabel>Versiones</FormLabel>
                 <Select value={selectedVersion} onChange={handleVersionChange}>
                   {versions.map((version, index) => (
-                    <option key={index} value={version}>{version}</option>
+                    <option key={index} value={version.version}>{version.version}</option>
                   ))}
                 </Select>
               </FormControl>
