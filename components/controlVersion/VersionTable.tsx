@@ -37,10 +37,10 @@ const columns = [
         width: "180px"
     },
     {
-        name: "Version",
+        name: "Version Actual",
         selector: (row: Document) => row.version.version,
         sortable: true,
-        width: "100px"
+        width: "200px"
     },
     {
         name: "Template",
@@ -60,13 +60,13 @@ export default function VersionTable() {
     if (errorDocuments) return <p>Error...</p>
 
     return (
-        <div className="space-y-8 w-[1000px] ">
+        <div className="space-y-8 w-[900px] ">
             <DataTable
                 title="Documentos"
                 columns={columns}
                 data={dataDocuments?.getAllDocument}
                 pagination
-                onRowClicked={row => router.push(`/user/dashboard/document/${row.id}`)}
+                onRowClicked={row => router.push(`/user/versionControl/${row.id}/versionDetail`)}
                 customStyles={customStyles}
             />
         </div>
