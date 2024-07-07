@@ -71,21 +71,4 @@ export const GET_ALL_VERSIONS_BY_DOCUMENT = gql`
         }
     }
 `;
-// export const GET_ALL_VERSIONS_BY_DOCUMENT = gql`
-//     query GetAllVersionsByDocument($id_document: Int!) {
-//         getAllDocumentsVersions(id_document: $id_document) {
-//             id
-//             id_document
-//             id_project
-//             id_user
-//             title
-//             timestamp
-//             read_only
-//             is_active
-//             version {
-//                 version
-//                 last_version
-//             }
-//         }
-//     }
-// `;
+

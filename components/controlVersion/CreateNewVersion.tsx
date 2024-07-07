@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Box, Button, FormControl, FormLabel, Input, VStack, IconButton, Text, Stack, Center, InputGroup, InputLeftAddon, FormErrorMessage } from '@chakra-ui/react';
-import { CloseIcon } from '@chakra-ui/icons';
+import { Box, Button, FormControl, FormLabel, Input, VStack, IconButton, Text, Stack, Center, InputGroup, InputLeftAddon, FormErrorMessage, InputRightAddon } from '@chakra-ui/react';
+import { CloseIcon, ArrowForwardIcon } from '@chakra-ui/icons';
 import { GET_DOCUMENT_BY_ID } from '../apollo/queries';
 import { useQuery } from '@apollo/client';
 import { usePathname } from 'next/navigation';
@@ -49,12 +49,10 @@ const CreateNewVersion: React.FC = () => {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [sameStructure, setSameStructure] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [versionError, setVersionError] = useState<string | null>(null);
 
   const documentId = parseInt(usePathname().split('/')[3]);
   console.log(documentId);
 
-  // Gestion de documento en la vista
   const { data: RequirementDocument, loading: loadingDocument, error: documentError } = useQuery<{ getDocument: Document }>(GET_DOCUMENT_BY_ID, { variables: { id: documentId } });
   const [documento, setDocumento] = useState<Document | null>(null);
 
@@ -80,31 +78,26 @@ const CreateNewVersion: React.FC = () => {
     }
   }, [RequirementDocument]);
 
-  const validateVersion = (version: string) => {
-    const versionPattern = /^\d+\.\d+\.\d+$/;
-    return versionPattern.test(version);
-  };
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!validateVersion(version)) {
-      setVersionError('Formato de versión inválido. Debe ser número.número.número, por ejemplo, 1.1.0');
-      return;
-    }
+    const filteredRequirements = requirements
+      .filter(req => !req.disabled)
+      .map(req => ({
+        id: req.index,
+        content: req.content.filter(content => !content.disabled).map(content => `${content.key}: ${content.value}`)
+      }));
 
-    setVersionError(null);
-    
     const formData = {
-      version,
-      versionTitle,
-      requirements: sameStructure ? requirements.map(req => ({
-        ...req,
-        content: requirements[0].content.map(({ key, value, disabled }) => ({ key, value, disabled })),
-      })) : requirements
+      id_document: documentId,
+      id_user: 1,
+      title: versionTitle,
+      content: JSON.stringify({ requirements: filteredRequirements }),
+      id_template: RequirementDocument?.getDocument.id_project
     };
-    // Aquí manejarías el formData, como enviarlo a tu backend
+
     console.log('Form Data:', formData);
+    // Aquí puedes enviar el formData al backend
   };
 
   const addRequirements = (count: number) => {
@@ -187,13 +180,19 @@ const CreateNewVersion: React.FC = () => {
     }
   }, [sameStructure]);
 
+  const incrementVersion = (version: string) => {
+    const parts = version.split('.').map(Number);
+    parts[parts.length - 1] += 1;
+    return parts.join('.');
+  };
+
   return (
     <Center>
       <Box width="800px"> {/* Adjust the width as needed */}
         <form onSubmit={handleSubmit}>
           <Box p={5} borderWidth={1} borderRadius={5} boxShadow="lg">
             <VStack spacing={4} align="stretch">
-              <FormControl isInvalid={!!versionError}>
+              <FormControl>
                 <FormLabel>Título de Documento</FormLabel>
                 <Input
                   value={versionTitle}
@@ -201,16 +200,22 @@ const CreateNewVersion: React.FC = () => {
                   minLength={5}
                   maxLength={60}
                 />
-                <InputGroup size={'sm'} width={'20%'} marginTop={3}>
+                <InputGroup size={'sm'} width={'40%'} marginTop={3}>
                   <InputLeftAddon>Versión</InputLeftAddon>
                   <Input
                     type='text'
                     value={version}
-                    onChange={(e) => setVersion(e.target.value)}
-                    isInvalid={!!versionError}
+                    readOnly
+                  />
+                  <InputRightAddon>
+                    <ArrowForwardIcon />
+                  </InputRightAddon>
+                  <Input
+                    type='text'
+                    value={incrementVersion(version)}
+                    readOnly
                   />
                 </InputGroup>
-                {versionError && <FormErrorMessage>{versionError}</FormErrorMessage>}
               </FormControl>
               <>
                 {requirements.map((requirement, reqIndex) => (
