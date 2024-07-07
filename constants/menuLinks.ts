@@ -95,6 +95,10 @@ export const PatientMenuLinks = [
       link: "/user/template/new",
     },
     {
+      name: "Versiones de Documentos",
+      link: "/user/versionControl",
+    },
+    {
       name: "Ir a foros",
       link: "",
     },

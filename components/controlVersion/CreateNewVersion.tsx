@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Box, Button, FormControl, FormLabel, Input, VStack, IconButton, Text, Stack, Center } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Input, VStack, IconButton, Text, Stack, Center, InputGroup, InputLeftAddon, FormErrorMessage } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
 import { CREATE_TEMPLATE_MUTATION } from '../apollo/mutations';
 import { useMutation } from '@apollo/client';
@@ -24,7 +24,7 @@ interface Requirement {
 const CreateNewVersion: React.FC = () => {
   const [createTemplate] = useMutation(CREATE_TEMPLATE_MUTATION);
   const [version, setVersion] = useState<string>(documentoRequisito.version);
-  const [templateTitle, setTemplateTitle] = useState<string>(documentoRequisito.title);
+  const [versionTitle, setVersionTitle] = useState<string>(documentoRequisito.title);
   const [requirements, setRequirements] = useState<Requirement[]>(documentoRequisito.requirements.map((req, index) => ({
     index: index + 1,
     content: req.content.map(item => {
@@ -36,17 +36,33 @@ const CreateNewVersion: React.FC = () => {
   })));
   const [sameStructure, setSameStructure] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [versionError, setVersionError] = useState<string | null>(null);
+
+  const validateVersion = (version: string) => {
+    const versionPattern = /^\d+\.\d+\.\d+$/;
+    return versionPattern.test(version);
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+
+    if (!validateVersion(version)) {
+      setVersionError('Formato de versión inválido. Debe ser número.número.número, por ejemplo, 1.1.0');
+      return;
+    }
+
+    setVersionError(null);
     
     const formData = {
-      format: sameStructure ? requirements.map(req => ({
+      version,
+      versionTitle,
+      requirements: sameStructure ? requirements.map(req => ({
         ...req,
         content: requirements[0].content.map(({ key, value, disabled }) => ({ key, value, disabled })),
       })) : requirements
     };
     // Aquí manejarías el formData, como enviarlo a tu backend
+    console.log('Form Data:', formData);
   };
 
   const addRequirements = (count: number) => {
@@ -135,15 +151,24 @@ const CreateNewVersion: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <Box p={5} borderWidth={1} borderRadius={5} boxShadow="lg">
             <VStack spacing={4} align="stretch">
-              <FormControl>
+              <FormControl isInvalid={!!versionError}>
                 <FormLabel>Título de Documento</FormLabel>
                 <Input
-                  value={templateTitle}
-                  onChange={(e) => setTemplateTitle(e.target.value)}
+                  value={versionTitle}
+                  onChange={(e) => setVersionTitle(e.target.value)}
                   minLength={5}
                   maxLength={60}
                 />
-                <Text>Versión: {version}</Text>
+                <InputGroup size={'sm'} width={'20%'} marginTop={3}>
+                  <InputLeftAddon>Versión</InputLeftAddon>
+                  <Input
+                    type='text'
+                    value={version}
+                    onChange={(e) => setVersion(e.target.value)}
+                    isInvalid={!!versionError}
+                  />
+                </InputGroup>
+                {versionError && <FormErrorMessage>{versionError}</FormErrorMessage>}
               </FormControl>
               <>
                 {requirements.map((requirement, reqIndex) => (

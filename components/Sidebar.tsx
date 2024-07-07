@@ -27,7 +27,6 @@ const Sidebar: React.FC<{ menuLinks: menuLink[], submenuLinks: menuLink[] }> = (
         </div>
         <div className="flex-1 overflow-auto py-2">
           <nav className="grid items-start px-4 text-sm font-medium">
-            <SideBarDropdown title="Control de versiones" links={submenuLinks} pathname={pathname} />
             {menuLinks.map((link) => (
               <Link
                 key={link.name}

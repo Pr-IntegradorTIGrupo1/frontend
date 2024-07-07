@@ -1,16 +1,20 @@
 'use client';
 import { useState } from 'react';
-import { Box, FormControl, FormLabel, Input, VStack, Text, Center, Select, Button, Icon, Flex, HStack, Tooltip } from '@chakra-ui/react';
+import { Box, FormControl, FormLabel, Input, VStack, Text, Center, Select, Button, Icon, Flex, HStack, Tooltip, InputGroup, InputLeftAddon } from '@chakra-ui/react';
 import { documentoRequisito, documentoRequisito2 } from '@/app/user/versionControl/fakeData/documentoRequisito';
 import { AddIcon, DeleteIcon, DownloadIcon } from '@chakra-ui/icons';
+import { useRouter } from 'next/navigation'
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 const VersionDetail: React.FC = () => {
+  const documentId = 1;
   const versions = ["1.0.0", "1.1.0"]; // Lista de versiones
   const [selectedVersion, setSelectedVersion] = useState(versions[0]); // Estado para la versión seleccionada
 
-  // Función para manejar el cambio de versión
+  
+  const router = useRouter()
+
   const handleVersionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedVersion(event.target.value);
   };
@@ -18,16 +22,16 @@ const VersionDetail: React.FC = () => {
   // Selecciona el documento de requisito según la versión seleccionada
   const currentDocumentoRequisito = selectedVersion === "1.0.0" ? documentoRequisito : documentoRequisito2;
 
-  // Función para exportar a PDF
+  
   const handleExportPDF = () => {
     const input = document.getElementById('pdfContent');
-    if (input) { // Verificación para asegurar que input no sea null
+    if (input) { 
       html2canvas(input).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210; // Ancho de la imagen en el PDF (A4 width in mm)
-        const pageHeight = 295; // Altura de la página en el PDF (A4 height in mm)
-        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Mantener la relación de aspecto
+        const imgWidth = 210;
+        const pageHeight = 295; 
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
         let heightLeft = imgHeight;
         let position = 0;
 
@@ -53,7 +57,8 @@ const VersionDetail: React.FC = () => {
   // Función para crear una nueva versión
   const handleCreateVersion = () => {
     console.log("Crear nueva versión");
-    // Lógica para crear una nueva versión
+    router.push(`/user/versionControl/${documentId}/newVersion`);
+
   };
 
   // Función para eliminar la versión
@@ -104,6 +109,7 @@ const VersionDetail: React.FC = () => {
                 readOnly
               />
               <Text>Versión: {currentDocumentoRequisito.version}</Text>
+              
             </FormControl>
             <>
               {currentDocumentoRequisito.requirements.map((requirement, reqIndex) => (
