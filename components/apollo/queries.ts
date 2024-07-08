@@ -36,3 +36,66 @@ export const GET_ALL_DOCUMENTS_LAST_VERSION_QUERY = gql`
         }
     }
 `;
+
+//CONTROL DE VERSIONES
+export const GET_DOCUMENT_BY_ID = gql`
+    query GetDocumentById($id: Int!) {
+        getDocument(id: $id) {
+            id
+            id_project
+            id_user
+            title
+            timestamp
+            version{
+                version
+            }
+            requirements{
+                id
+                content
+
+            }
+        }
+}
+`
+;
+
+export const GET_ALL_VERSIONS_BY_DOCUMENT = gql`
+    query GetAllVersionsByDocument($id_document: Int!) {
+        getAllDocumentsVersions(id_document: $id_document) {
+            id
+            id_document
+            version {
+                version
+                last_version
+            }
+        }
+    }
+`;
+
+export const GET_ALL_DOCUMENT_LAST_VERSION = gql`
+    query GetAllDocumentsLastVersion {
+        getAllDocumentsLastVersion {
+            id
+            id_project
+            id_user
+            title
+            timestamp
+            template{
+                id
+                title
+                format
+            }
+            version{
+                version
+            }
+            requirements{
+                id
+                content
+                status
+
+            }
+        }
+}
+`
+;
+

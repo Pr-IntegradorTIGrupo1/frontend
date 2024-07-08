@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../../app/globals.css";
 import Sidebar from "@/components/Sidebar";
-import { UserMenuLinks } from "@/constants/menuLinks";
+import { UserMenuLinks, subMenuLinks } from "@/constants/menuLinks";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <div className="flex h-full">
-      <Sidebar menuLinks={UserMenuLinks} />
+      <Sidebar menuLinks={UserMenuLinks} submenuLinks={subMenuLinks} />
       {children}
     </div>
   );

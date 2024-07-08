@@ -2,29 +2,26 @@
 import React from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import SideBarDropdown from "./SidebarDropdown";
 
 interface menuLink {
   name: string;
   link: string;
 }
 
-const Sidebar: React.FC<{ menuLinks: menuLink[] }> = ({ menuLinks }) => {
+const Sidebar: React.FC<{ menuLinks: menuLink[], submenuLinks: menuLink[] }> = ({ menuLinks, submenuLinks }) => {
   const pathname = usePathname();
+
+  
+
   return (
-    <div className="hidden border-r bg-gray-100/40 lg:block w-1/6 h-full">
-      <div className="flex max-h-screen flex-col gap-2">
+    <div className="fixed top-0 left-0 h-full w-1/8 border-r bg-gray-100/40">
+      <div className="flex flex-col h-full">
         <div className="flex h-[60px] items-center border-b px-6">
           <Link
             className="flex items-center gap-1 font-semibold"
             href={menuLinks[0].link}
           >
-            {/*<Image
-              src="/EzTransparentLogo.png"
-              width="60"
-              height="60"
-              alt="Logo"
-  />*/}
             <span>EZRequirement</span>
           </Link>
         </div>
@@ -45,8 +42,8 @@ const Sidebar: React.FC<{ menuLinks: menuLink[] }> = ({ menuLinks }) => {
             ))}
           </nav>
         </div>
-        <div>
-          <div className="flex items-center justify-center h-12 border-t">
+        <div className="border-t py-2">
+          <div className="flex items-center justify-center h-12">
             <span className="text-gray-500">
               © {new Date().getFullYear()} EZRequirement
             </span>
