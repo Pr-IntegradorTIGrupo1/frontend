@@ -21,3 +21,12 @@ export const CREATE_DOCUMENT_MUTATION = gql`
         }
     }   
 `;
+
+export const UPDATE_REQUIREMENT = gql`
+  mutation UpdateRequirement($input: UpdateRequirementInput!) {
+    updateRequirement(input: $input) {
+      id
+      status
+    }
+  }
+`

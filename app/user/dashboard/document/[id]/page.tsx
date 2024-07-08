@@ -1,118 +1,105 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Switch } from '@headlessui/react'
-import { PencilIcon, CheckIcon, XIcon } from '@heroicons/react/solid'
+import { PencilIcon } from '@heroicons/react/solid'
+import { useQuery, useMutation } from '@apollo/client'
+import { useRouter } from 'next/navigation'
+import { UPDATE_REQUIREMENT } from '@/components/apollo/mutations'
+import { GET_DOCUMENT } from '@/components/apollo/queries'
+import Link from 'next/link'
 
-type Requisito = {
-  requisito_id: number;
-  contenido: string;
-  estado: boolean;
+type Requirement = {
+  id: number;
+  content: string;
+  status: boolean;
 }
 
 const DocumentDetail = ({ params }: { params: { id: string } }) => {
-  const [requisitos, setRequisitos] = useState<Requisito[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editMode, setEditMode] = useState<{ [key: number]: boolean }>({})
+  const router = useRouter()
+  const documentId = parseInt(params.id)
 
-  useEffect(() => {
-    // Modificar llamada a la API con la ruta correcta
-    /*
-    fetch(`/api/document/${params.id}/requisitos`)
-      .then(response => response.json())
-      .then(data => {
-        setRequisitos(data)
-        setLoading(false)
+  const { loading, error, data } = useQuery(GET_DOCUMENT, {
+    variables: { id: documentId },
+  })
+
+  const [updateRequirement] = useMutation(UPDATE_REQUIREMENT)
+
+  const handleStateChange = async (id: number, status: boolean) => {
+    try {
+      await updateRequirement({
+        variables: {
+          input: {
+            id,
+            status
+          }
+        },
+        optimisticResponse: {
+          updateRequirement: {
+            id,
+            status,
+            __typename: 'Requirement'
+          }
+        },
+        update: (cache, { data: { updateRequirement } }) => {
+          const existingDocument = cache.readQuery<any>({
+            query: GET_DOCUMENT,
+            variables: { id: documentId }
+          })
+
+          if (existingDocument) {
+            const updatedRequirements = existingDocument.getDocument.requirements.map(
+              (req: Requirement) => req.id === updateRequirement.id ? { ...req, status: updateRequirement.status } : req
+            )
+
+            cache.writeQuery({
+              query: GET_DOCUMENT,
+              variables: { id: documentId },
+              data: {
+                getDocument: {
+                  ...existingDocument.getDocument,
+                  requirements: updatedRequirements
+                }
+              }
+            })
+          }
+        }
       })
-      .catch(error => {
-        console.error('Error fetching requisitos:', error)
-        setLoading(false)
-      })
-    */
-
-    // Datos de prueba
-    const testRequisitos: Requisito[] = [
-      {
-        requisito_id: 1,
-        contenido: 'Requisito 1',
-        estado: true,
-      },
-      {
-        requisito_id: 2,
-        contenido: 'Requisito 2',
-        estado: false,
-      },
-      {
-        requisito_id: 3,
-        contenido: 'Requisito 3',
-        estado: true,
-      },
-    ]
-
-    // Simulación de la carga de datos
-    setTimeout(() => {
-      setRequisitos(testRequisitos)
-      setLoading(false)
-    }, 400)
-  }, [params.id])
-
-  const handleEditToggle = (id: number) => {
-    setEditMode(prev => ({ ...prev, [id]: !prev[id] }))
+    } catch (error) {
+      console.error('Error updating requirement:', error)
+    }
   }
 
-  const handleContentChange = (id: number, content: string) => {
-    setRequisitos(prev =>
-      prev.map(req => req.requisito_id === id ? { ...req, contenido: content } : req)
-    )
-  }
+  if (loading) return <div>Cargando...</div>
+  if (error) return <div>Error: {error.message}</div>
 
-  const handleStateChange = (id: number, state: boolean) => {
-    setRequisitos(prev =>
-      prev.map(req => req.requisito_id === id ? { ...req, estado: state } : req)
-    )
-  }
-
-  if (loading) {
-    return <div>Cargando...</div>
-  }
+  const { title, requirements } = data.getDocument
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Detalle del Documento N°: {params.id}</h1>
+      <h1 className="text-2xl font-bold mb-4">Detalle del Documento: {title}</h1>
       <div className="space-y-4">
-        {requisitos.map(requisito => (
-          <div key={requisito.requisito_id} className="bg-white shadow-md rounded-lg p-6 flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              {editMode[requisito.requisito_id] ? (
-                <input
-                  type="text"
-                  value={requisito.contenido}
-                  onChange={(e) => handleContentChange(requisito.requisito_id, e.target.value)}
-                  className="text-lg font-medium border rounded p-2"
-                />
-              ) : (
-                <span className="text-lg font-medium">{requisito.contenido}</span>
-              )}
-              <button
-                onClick={() => handleEditToggle(requisito.requisito_id)}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center"
-              >
-                {editMode[requisito.requisito_id] ? (
-                  <CheckIcon className="h-5 w-5" />
-                ) : (
+        {requirements.map((requirement: Requirement) => (
+          <div key={requirement.id} className="bg-white shadow-md rounded-lg p-6 flex justify-between items-center w-full">
+            <div className="flex-grow flex items-center space-x-4">
+              <span className="text-lg font-medium flex-grow">{requirement.content}</span>
+              <Link href={`/user/versionControl/${params.id}`}>
+                <button
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center"
+                >
                   <PencilIcon className="h-5 w-5" />
-                )}
-              </button>
+                </button>
+              </Link>
             </div>
-            <div className="flex items-center space-x-2 pl-4">
-              <span className="text-sm font-medium">{requisito.estado ? 'Completado' : 'Pendiente'}</span>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm font-medium">{requirement.status ? 'Completado' : 'Pendiente'}</span>
               <Switch
-                checked={requisito.estado}
-                onChange={(state) => handleStateChange(requisito.requisito_id, state)}
-                className={`${requisito.estado ? 'bg-green-500' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full`}
+                checked={requirement.status}
+                onChange={(state) => handleStateChange(requirement.id, state)}
+                className={`${requirement.status ? 'bg-green-500' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full`}
               >
                 <span className="sr-only">Toggle State</span>
                 <span
-                  className={`${requisito.estado ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform bg-white rounded-full transition`}
+                  className={`${requirement.status ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform bg-white rounded-full transition`}
                 />
               </Switch>
             </div>

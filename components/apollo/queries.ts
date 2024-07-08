@@ -36,3 +36,17 @@ export const GET_ALL_DOCUMENTS_LAST_VERSION_QUERY = gql`
         }
     }
 `;
+
+export const GET_DOCUMENT = gql`
+  query getDocument($id: Int!) {
+    getDocument(id: $id) {
+      id
+      title
+      requirements {
+        id
+        content
+        status
+      }
+    }
+  }
+`;
