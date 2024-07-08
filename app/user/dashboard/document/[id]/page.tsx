@@ -69,6 +69,19 @@ const DocumentDetail = ({ params }: { params: { id: string } }) => {
     }
   }
 
+  const parseContent = (content: string) => {
+    try {
+      const parsedContent = JSON.parse(content);
+      if (Array.isArray(parsedContent.content)) {
+        return parsedContent.content.join('\n');
+      }
+      return parsedContent.content.toString();
+    } catch (e) {
+      console.error('Error parsing content:', e);
+      return content;
+    }
+  }
+
   if (loading) return <div>Cargando...</div>
   if (error) return <div>Error: {error.message}</div>
 
@@ -81,7 +94,9 @@ const DocumentDetail = ({ params }: { params: { id: string } }) => {
         {requirements.map((requirement: Requirement) => (
           <div key={requirement.id} className="bg-white shadow-md rounded-lg p-6 flex justify-between items-center w-full">
             <div className="flex-grow flex items-center space-x-4">
-              <span className="text-lg font-medium flex-grow">{requirement.content}</span>
+              <span className="text-lg font-medium flex-grow whitespace-pre-line">
+                {parseContent(requirement.content)}
+              </span>
               <Link href={`/user/versionControl/${params.id}`}>
                 <button
                   className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center"
