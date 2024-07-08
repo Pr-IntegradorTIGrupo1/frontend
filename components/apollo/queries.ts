@@ -72,3 +72,30 @@ export const GET_ALL_VERSIONS_BY_DOCUMENT = gql`
     }
 `;
 
+export const GET_ALL_DOCUMENT_LAST_VERSION = gql`
+    query GetAllDocumentsLastVersion {
+        getAllDocumentsLastVersion {
+            id
+            id_project
+            id_user
+            title
+            timestamp
+            template{
+                id
+                title
+                format
+            }
+            version{
+                version
+            }
+            requirements{
+                id
+                content
+                status
+
+            }
+        }
+}
+`
+;
+

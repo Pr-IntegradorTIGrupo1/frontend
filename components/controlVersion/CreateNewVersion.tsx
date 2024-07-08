@@ -3,10 +3,11 @@ import { useState, useEffect } from 'react';
 import { Box, Button, FormControl, FormLabel, Input, VStack, IconButton, Text, Stack, Center, InputGroup, InputLeftAddon, FormErrorMessage, InputRightAddon } from '@chakra-ui/react';
 import { CloseIcon, ArrowForwardIcon } from '@chakra-ui/icons';
 import { GET_DOCUMENT_BY_ID } from '../apollo/queries';
-import { useQuery } from '@apollo/client';
-import { usePathname } from 'next/navigation';
+import { useMutation, useQuery } from '@apollo/client';
+import { usePathname, useRouter } from 'next/navigation';
 
 import Swal from 'sweetalert2';
+import { UPDATE_DOCUMENT_MUTATION } from '../apollo/mutations';
 
 interface RequirementContent {
   key: string;
@@ -44,6 +45,8 @@ type DocumentVersion = {
 };
 
 const CreateNewVersion: React.FC = () => {
+  const router = useRouter();
+
   const [version, setVersion] = useState<string>('');
   const [versionTitle, setVersionTitle] = useState<string>('');
   const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -51,14 +54,13 @@ const CreateNewVersion: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const documentId = parseInt(usePathname().split('/')[3]);
-  console.log(documentId);
 
   const { data: RequirementDocument, loading: loadingDocument, error: documentError } = useQuery<{ getDocument: Document }>(GET_DOCUMENT_BY_ID, { variables: { id: documentId } });
   const [documento, setDocumento] = useState<Document | null>(null);
+  const [updateDocument] = useMutation(UPDATE_DOCUMENT_MUTATION);
 
   useEffect(() => {
     if (RequirementDocument) {
-      console.log(RequirementDocument);
       setDocumento(RequirementDocument.getDocument);
       const { version, title, requirements } = RequirementDocument.getDocument;
       setVersion(version.version.toString());
@@ -97,7 +99,54 @@ const CreateNewVersion: React.FC = () => {
     };
 
     console.log('Form Data:', formData);
+    
     // Aquí puedes enviar el formData al backend
+    const confirmation = await Swal.fire({
+      title: '¿Estas seguro?',
+      text: "¿Estás seguro de que deseas actualizar este documento de requisitos?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, confirmar',
+      cancelButtonText: 'Cancelar'
+    })
+
+    if (confirmation.isConfirmed) {
+      try{
+        const { data, errors } = await updateDocument({
+          variables: {
+            input: {
+              id_document: RequirementDocument?.getDocument.id,
+              id_user: 1,
+              title: versionTitle,
+              content: JSON.stringify({ requirements: filteredRequirements }),
+              id_template: RequirementDocument?.getDocument.id_project
+            }
+          }
+        });
+        if(data?.updateDocument.success){
+          Swal.fire(
+            'Nueva versión creada',
+            'Se ha creado una nueva versión del Documento de requisitos.',
+            'success'
+          );
+          router.push(`/user/versionControl/${documentId+1}/newVersion`)
+        }else{
+          console.error("error al actualizar el Documento de requisitos", errors);
+          Swal.fire(
+            'Error',
+            'Hubo un error al actualizar el Documento de requisitos.',
+            'error'
+          );
+        } 
+      }catch(error){
+        console.error("error al actualizar el Documento de requisitos", error)
+        Swal.fire(
+          'Error',
+          'Hubo un error al actualizar el Documento de requisitos.',
+          'error'
+        );
+      }
+    }
   };
 
   const addRequirements = (count: number) => {
@@ -185,6 +234,10 @@ const CreateNewVersion: React.FC = () => {
     parts[parts.length - 1] += 1;
     return parts.join('.');
   };
+
+  if (loadingDocument) return <p>Cargando...</p>;
+  if (documentError) return <p>Error al cargar los templates: {documentError.message}</p>;
+
 
   return (
     <Center>

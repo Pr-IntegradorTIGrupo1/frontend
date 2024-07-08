@@ -15,7 +15,7 @@ const Sidebar: React.FC<{ menuLinks: menuLink[], submenuLinks: menuLink[] }> = (
   
 
   return (
-    <div className="fixed top-0 left-0 h-full w-1/6 border-r bg-gray-100/40">
+    <div className="fixed top-0 left-0 h-full w-1/8 border-r bg-gray-100/40">
       <div className="flex flex-col h-full">
         <div className="flex h-[60px] items-center border-b px-6">
           <Link

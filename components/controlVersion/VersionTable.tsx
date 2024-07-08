@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQuery } from "@apollo/client";
 import { GET_ALL_DOCUMENTS } from "@/components/apollo/queries";
 import { Version } from '../../interfaces/Version';
+import { GET_ALL_DOCUMENT_LAST_VERSION } from '../apollo/queries';
 
 const customStyles = {
     rows: {
@@ -40,7 +41,7 @@ const columns = [
         name: "Version Actual",
         selector: (row: Document) => row.version.version,
         sortable: true,
-        width: "200px"
+        width: "160px"
     },
     {
         name: "Template",
@@ -51,7 +52,7 @@ const columns = [
 ];
 
 export default function VersionTable() {
-    const { data: dataDocuments, loading: loadingDocuments, error: errorDocuments, refetch } = useQuery(GET_ALL_DOCUMENTS)
+    const { data: dataDocuments, loading: loadingDocuments, error: errorDocuments, refetch } = useQuery(GET_ALL_DOCUMENT_LAST_VERSION)
     console.log(dataDocuments)
 
     const router = useRouter()
@@ -60,11 +61,11 @@ export default function VersionTable() {
     if (errorDocuments) return <p>Error...</p>
 
     return (
-        <div className="space-y-8 w-[900px] ">
+        <div className="space-y-8 w-[950px] ">
             <DataTable
                 title="Documentos"
                 columns={columns}
-                data={dataDocuments?.getAllDocument}
+                data={dataDocuments?.getAllDocumentsLastVersion}
                 pagination
                 onRowClicked={row => router.push(`/user/versionControl/${row.id}/versionDetail`)}
                 customStyles={customStyles}
