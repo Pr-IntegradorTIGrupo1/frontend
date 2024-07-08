@@ -3,7 +3,6 @@ import { Document } from "@/interfaces/Document";
 import DataTable from "react-data-table-component";
 import { useRouter } from 'next/navigation'
 import { useQuery } from "@apollo/client";
-import { GET_ALL_DOCUMENTS } from "@/components/apollo/queries";
 import { Version } from '../../interfaces/Version';
 import { GET_ALL_DOCUMENT_LAST_VERSION } from '../apollo/queries';
 
@@ -44,7 +43,7 @@ const columns = [
         width: "160px"
     },
     {
-        name: "Template",
+        name: "Plantilla",
         selector: (row: Document) => row.template.title,
         sortable: true,
     }

@@ -9,6 +9,7 @@ import { CREATE_DOCUMENT_MUTATION } from '../apollo/mutations';
 import { useQuery, useMutation } from '@apollo/client';
 import Swal from 'sweetalert2';
 import { Requirement, Fields, FormValues, Project, Template } from '@/interfaces/FormValues';
+import { useRouter } from 'next/navigation';
 
 const projects: Project[] = [
   { id: '1', name: 'Proyecto 1' },
@@ -41,13 +42,30 @@ const CreateRequirementForm: React.FC = () => {
   const [documentTitle, setDocumentTitle] = useState<string>('');
   const [templates, setTemplates] = useState<Template[]>([]);
 
+  const router = useRouter();
   // Call API to fetch templates
   const { data: dataTemplates, loading: loadingTemplates, error: templatesError, refetch } = useQuery(GET_ALL_TEMPLATES);
 
   useEffect(() => {
-    if (dataTemplates) {
-      setTemplates(dataTemplates.getAllTemplate);
-    }
+    const checkTemplatesAndRedirect = async () => {
+      if (dataTemplates) {
+        if (dataTemplates.getAllTemplate.length === 0) {
+          const confirmation = await Swal.fire({
+            title: 'No hay plantillas disponibles',
+            text: 'Será redirigido a la página de creación de plantillas.',
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonText: 'OK',
+          });
+          if (confirmation.isConfirmed) {
+            router.push('/user/template/new');
+          }
+        }
+        setTemplates(dataTemplates.getAllTemplate);
+      }
+    };
+
+    checkTemplatesAndRedirect();
   }, [dataTemplates]);
 
   useEffect(() => {
@@ -91,13 +109,13 @@ const CreateRequirementForm: React.FC = () => {
       requirements: requirements
     };
 
-    const title = documentTitle;//1) title: String!
-    const content = JSON.stringify(formattedData);//2) content: String!
+    const title = documentTitle; //1) title: String!
+    const content = JSON.stringify(formattedData); //2) content: String!
     console.log(content);
     
     const id_user = 1; //3) Hardcoded user ID for now
-    const projectId = parseInt(selectedProjectId);//4) id_project: Int!
-    const templateId = selectedTemplateId;//5) id_template: Int!
+    const projectId = parseInt(selectedProjectId); //4) id_project: Int!
+    const templateId = selectedTemplateId; //5) id_template: Int!
 
     const result = await Swal.fire({
       title: '¿Estas seguro?',
@@ -106,10 +124,10 @@ const CreateRequirementForm: React.FC = () => {
       showCancelButton: true,
       confirmButtonText: 'Sí, confirmar',
       cancelButtonText: 'Cancelar'
-    })
+    });
 
     if (result.isConfirmed) {
-      try{
+      try {
         const { data, errors } = await createDocument({
           variables: {
             input: {
@@ -121,23 +139,23 @@ const CreateRequirementForm: React.FC = () => {
             }
           }
         });
-        if(data?.createDocument.success){
+        if (data?.createDocument.success) {
           Swal.fire(
             'Documento de requisitos creado',
             'El Documento de requisitos se ha creado con éxito.',
             'success'
           );
-        }else{
+        } else {
           console.error("error al crear el Documento de requisitos", errors);
           Swal.fire(
             'Error',
             'Hubo un error al crear el Documento de requisitos.',
             'error'
           );
-        } 
-        console.log(data); 
-      }catch(error){
-        console.error("error al crear el Documento de requisitos", error)
+        }
+        console.log(data);
+      } catch (error) {
+        console.error("error al crear el Documento de requisitos", error);
         Swal.fire(
           'Error',
           'Hubo un error al crear el Documento de requisitos.',
@@ -156,7 +174,7 @@ const CreateRequirementForm: React.FC = () => {
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, errors, touched, setFieldValue }) => (
+      {({ values, errors, touched, setFieldValue, isValid, dirty }) => (
         <Form>
           <Box p={5} borderWidth={1} borderRadius={5} boxShadow="lg">
             <VStack spacing={4} align="stretch">
@@ -169,7 +187,10 @@ const CreateRequirementForm: React.FC = () => {
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     setFieldValue('project', e.target.value);
                     const project = projects.find(p => p.id === e.target.value);
-                    if (project){ setSelectedProjectName(project.name);  setSelectedProjectId(project.id)};
+                    if (project) {
+                      setSelectedProjectName(project.name);
+                      setSelectedProjectId(project.id);
+                    }
                   }}
                 >
                   {projects.map((proj) => (
@@ -205,7 +226,7 @@ const CreateRequirementForm: React.FC = () => {
                 <FormErrorMessage>{errors.documentTitle}</FormErrorMessage>
               </FormControl>
               <FieldArray name="requirements">
-                {({ push, remove }) => (
+                {({ remove }) => (
                   <>
                     {values.requirements.map((requirement, reqIndex) => {
                       const requirementErrors = (errors.requirements as FormikErrors<Requirement>[] | undefined)?.[reqIndex];
@@ -240,7 +261,7 @@ const CreateRequirementForm: React.FC = () => {
                               return (
                                 <FormControl key={fieldIndex} isInvalid={!!fieldErrors?.value && !!fieldTouched?.value}>
                                   <FormLabel>{field.label}</FormLabel>
-                                  <Field as={Input} name={`requirements.${reqIndex}.fields.${fieldIndex}.value`} minLength={2} maxLength={50}/>
+                                  <Field as={Input} name={`requirements.${reqIndex}.fields.${fieldIndex}.value`} minLength={2} maxLength={50} />
                                   <FormErrorMessage>{fieldErrors?.value}</FormErrorMessage>
                                 </FormControl>
                               );
@@ -249,16 +270,10 @@ const CreateRequirementForm: React.FC = () => {
                         </Box>
                       );
                     })}
-                    {values.requirements.length > 0 &&
-                      values.requirements[values.requirements.length - 1].fields.every(field => field.value) && (
-                        <Button onClick={() => push({ fields: [{ label: '', value: '' }] })} colorScheme="teal">
-                          Añadir más requisitos
-                        </Button>
-                      )}
                   </>
                 )}
               </FieldArray>
-              <Button type="submit" colorScheme="blue">
+              <Button type="submit" colorScheme="blue" isDisabled={!isValid || !dirty || !selectedProjectId || !selectedTemplateId}>
                 Finalizar
               </Button>
             </VStack>

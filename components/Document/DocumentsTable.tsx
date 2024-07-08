@@ -44,7 +44,7 @@ const columns = [
         width: "100px"
     },
     {
-        name: "Template",
+        name: "Plantilla",
         selector: (row: Document) => row.template.title,
         sortable: true,
     }

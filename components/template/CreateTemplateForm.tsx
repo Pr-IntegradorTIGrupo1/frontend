@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Box, Button, FormControl, FormLabel, Input, VStack, IconButton, Text, Select, HStack, InputGroup, InputRightElement, Switch, Stack, Center, Alert, AlertIcon } from '@chakra-ui/react';
+import { Box, Button, FormControl, FormLabel, Input, VStack, IconButton, Text, Select, HStack, InputGroup, InputRightElement, Switch, Stack, Center, Alert, AlertIcon, Tooltip } from '@chakra-ui/react';
 import { CloseIcon } from '@chakra-ui/icons';
 import { CREATE_TEMPLATE_MUTATION } from '../apollo/mutations';
 import { useMutation } from '@apollo/client';
@@ -22,12 +22,23 @@ const CreateTemplateForm: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
+
+    if (!templateTitle.trim()) {
+      setErrorMessage('El campo "Nombre de la plantilla" es obligatorio.');
+      return;
+    }
+
+    const isContentValid = requirements.every(req => req.content.some(content => content.trim()));
+
+    if (!isContentValid) {
+      setErrorMessage('Cada requisito debe tener al menos un contenido no vacío.');
+      return;
+    }
+
     const formData = {
-      
       format: sameStructure ? requirements.map(req => ({ ...req, content: requirements[0].content })) : requirements
     };
-    
+
     const result = await Swal.fire({
       title: '¿Estás seguro?',
       text: "¿Estás seguro de que quieres crear este template?",
@@ -36,11 +47,11 @@ const CreateTemplateForm: React.FC = () => {
       confirmButtonText: 'Sí, confirmar',
       cancelButtonText: 'Cancelar'
     });
-    
-    if(result.isConfirmed){
-      try{
+
+    if (result.isConfirmed) {
+      try {
         //llamada a la mutacion
-        const {data, errors } = await createTemplate({
+        const { data, errors } = await createTemplate({
           variables: {
             input: {
               title: templateTitle,
@@ -48,27 +59,24 @@ const CreateTemplateForm: React.FC = () => {
             }
           }
         });
-        console.log(templateTitle)
-        console.log(JSON.stringify(formData))
-        if(data?.createTemplate.success){
+        console.log(templateTitle);
+        console.log(JSON.stringify(formData));
+        if (data?.createTemplate.success) {
           Swal.fire(
             'Template creado',
             'El template ha sido creado exitosamente.',
             'success'
-          ); 
-        }else{
+          );
+        } else {
           console.error("error al crear el template", errors);
           Swal.fire(
             'Error',
             'Hubo un error al crear el template.',
             'error'
           );
-
         }
-        //console.log(data);
-
-      }catch(error){
-        console.error("error al crear el template", error)
+      } catch (error) {
+        console.error("error al crear el template", error);
         Swal.fire(
           'Error',
           'Hubo un error al crear el template.',
@@ -144,9 +152,11 @@ const CreateTemplateForm: React.FC = () => {
               <HStack spacing={4} width="100%">
                 <Box flex="1">
                   <FormControl display="flex" alignItems="center">
-                    <FormLabel htmlFor="same-structure-switch" mb="0">
-                      Requisitos iguales
-                    </FormLabel>
+                    <Tooltip label="Al activar esta opción se debe editar únicamente el requisito 1, esto modificará todos los demás requisitos.">
+                      <FormLabel htmlFor="same-structure-switch" mb="0">
+                        Requisitos iguales
+                      </FormLabel>
+                    </Tooltip>
                     <Switch
                       id="same-structure-switch"
                       isChecked={sameStructure}
@@ -226,7 +236,7 @@ const CreateTemplateForm: React.FC = () => {
                   onChange={(e) => setTemplateTitle(e.target.value)}
                   minLength={5}
                   maxLength={60}
-
+                  required
                 />
               </FormControl>
               <>
@@ -267,6 +277,7 @@ const CreateTemplateForm: React.FC = () => {
                                 readOnly={sameStructure && reqIndex > 0}
                                 minLength={2}
                                 maxLength={50}
+                                required
                               />
                               {requirement.content.length > 1 && (
                                 <IconButton
@@ -309,4 +320,5 @@ const CreateTemplateForm: React.FC = () => {
     </Center>
   );
 };
+
 export default CreateTemplateForm;
