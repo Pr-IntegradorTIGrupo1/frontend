@@ -12,22 +12,19 @@ interface menuLink {
 const Sidebar: React.FC<{ menuLinks: menuLink[] }> = ({ menuLinks }) => {
   const pathname = usePathname();
   return (
-    <div className="hidden border-r bg-gray-100/40 lg:block w-1/6 h-full">
-      <div className="flex max-h-screen flex-col gap-2">
-        <div className="flex h-[60px] items-center border-b px-6">
-          <Link
-            className="flex items-center gap-1 font-semibold"
-            href={menuLinks[0].link}
-          >
-            {/*<Image
-              src="/EzTransparentLogo.png"
-              width="60"
-              height="60"
-              alt="Logo"
-  />*/}
-            <span>EZRequirement</span>
-          </Link>
-        </div>
+    <div className="relative hidden lg:block w-1/6 h-screen">
+      <div className="absolute inset-0">
+        <Image
+          src="/img/ucn-bg.png"
+          alt="ucn-background"
+          layout="fill"
+          objectFit="cover"
+          priority
+          className="z-0 filter blur-[1.3px]"
+        />
+      </div>
+      <div className="relative flex flex-col gap-2 z-10 h-full">
+        
         <div className="flex-1 overflow-auto py-2">
           <nav className="grid items-start px-4 text-sm font-medium">
             {menuLinks.map((link) => (
@@ -35,8 +32,8 @@ const Sidebar: React.FC<{ menuLinks: menuLink[] }> = ({ menuLinks }) => {
                 key={link.name}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-all ${
                   pathname === link.link
-                    ? "text-gray-900 bg-gray-100 dark:bg-gray-800 dark:text-gray-50"
-                    : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
+                    ? "text-white bg-orange-500"
+                    : "text-white  hover:bg-orange-600"
                 }`}
                 href={link.link}
               >
@@ -45,12 +42,20 @@ const Sidebar: React.FC<{ menuLinks: menuLink[] }> = ({ menuLinks }) => {
             ))}
           </nav>
         </div>
-        <div>
-          <div className="flex items-center justify-center h-12 border-t">
-            <span className="text-gray-500">
-              © {new Date().getFullYear()} EZRequirement
-            </span>
-          </div>
+        <div className=" flex items-center justify-center h-12 ">
+        
+          <Link
+            type="button"
+            className="rounded-lg bg-blue-500  p-2 text-white hover:bg-orange-600"
+            href="http://localhost:4000/login"
+          >
+            Salir
+          </Link>
+        </div>
+        <div className="flex items-center justify-center h-12 border-t">
+          <span className="text-white">
+            © {new Date().getFullYear()} EZRequirement
+          </span>
         </div>
       </div>
     </div>

@@ -8,6 +8,9 @@ import "./globals.css";
 import { ChakraProvider } from '@chakra-ui/react'
 import { ApolloProvider } from "@apollo/client";
 import client from "@/components/apollo/ApolloClient";
+import NavBar from "@/components/ui/navbar";
+import Sidebar from "@/components/Sidebar";
+import { UserMenuLinks } from "@/constants/menuLinks";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +25,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ApolloProvider client={client}>
-          <ChakraProvider>    
+          <ChakraProvider>  
+            
+            
+            
+            <NavBar />
             {children}
           </ChakraProvider>  
         </ApolloProvider>  
