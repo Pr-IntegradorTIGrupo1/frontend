@@ -34,18 +34,24 @@ const columns = [
         name: "fecha creacion",
         selector: (row: Document) => row.timestamp,
         sortable: true,
-        width: "180px"
+        width: "160px"
     },
     {
-        name: "Version Actual",
+        name: "Versión",
         selector: (row: Document) => row.version.version,
         sortable: true,
-        width: "160px"
+        width: "100px"
     },
     {
         name: "Plantilla",
         selector: (row: Document) => row.template.title,
         sortable: true,
+    },
+    {
+        name: "Proyecto",
+        selector: (row: Document) => row.project.name,
+        sortable: true,
+        width: "150px"
     }
 
 ];

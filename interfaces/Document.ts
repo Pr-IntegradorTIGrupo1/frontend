@@ -11,6 +11,12 @@ export interface Document {
     timestamp: string;
     //forums: Forum[];
     template: Template;
+    project: Project;
     version: Version
     //requirements: Requirement[];
+}
+
+export interface Project {
+    id: number;
+    name: string;
 }

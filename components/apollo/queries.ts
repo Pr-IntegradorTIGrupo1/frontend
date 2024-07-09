@@ -42,8 +42,6 @@ export const GET_DOCUMENT_BY_ID = gql`
     query GetDocumentById($id: Int!) {
         getDocument(id: $id) {
             id
-            id_project
-            id_user
             title
             timestamp
             version{
@@ -76,23 +74,19 @@ export const GET_ALL_DOCUMENT_LAST_VERSION = gql`
     query GetAllDocumentsLastVersion {
         getAllDocumentsLastVersion {
             id
-            id_project
-            id_user
+            id_document
             title
             timestamp
-            template{
-                id
+            read_only
+            is_active
+            template {
                 title
-                format
             }
-            version{
+            version {
                 version
             }
-            requirements{
-                id
-                content
-                status
-
+            project {
+                name
             }
         }
 }
