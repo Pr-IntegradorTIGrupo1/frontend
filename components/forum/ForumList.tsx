@@ -24,6 +24,7 @@ interface Foro {
 const ForosPage = () => {
   const [idDocument, setIdDocument] = useState<string | null>(null);
   const [idDocumentInt, setIdDocumentInt] = useState<number>(0);
+  const [allDocuments, setAllDocuments] = useState<any[]>([]);
 
   const [selectedDocument, setSelectedDocument] = useState<string>("");
   const [foroTitle, setForoTitle] = useState<string>("");
@@ -41,6 +42,7 @@ const ForosPage = () => {
   useEffect(() => {
     if (DocumentsData) {
       console.log(DocumentsData);
+      setAllDocuments(DocumentsData.getAllDocumentsLastVersion);
     }
   }, [DocumentsData]);
 
@@ -65,9 +67,11 @@ const ForosPage = () => {
     // const selectedId = documentObject.id_document;
     // console.log(selectedId);
     
-
-    // setIdDocumentInt(documentObject.id);
     const selectedId = event.target.value;
+    const idNumerico = allDocuments.find(document => document.id_document === selectedId)?.id;
+    setIdDocumentInt(idNumerico);
+    
+    // setIdDocumentInt(documentObject.id);
     console.log(selectedId);
     
     
@@ -151,7 +155,7 @@ const ForosPage = () => {
   }
 
   return (
-    <Box p="5">
+    <Box p="5" width={800}>
       <Box display="flex" alignItems="center" mb={4}>
         <Select 
           placeholder="Selecciona el documento" 

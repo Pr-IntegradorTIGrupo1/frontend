@@ -51,3 +51,13 @@ export const CREATE_FORUM_MUTATION = gql`
         }
     }   
 `;
+
+//COMENTARIOS
+export const CREATE_COMMENT_MUTATION = gql`
+    mutation CreateComment($input: CreateCommentInput!) {
+        createComment(input: $input ) {
+            id
+            content
+        }
+    }   
+`;
