@@ -100,7 +100,7 @@ export const PatientMenuLinks = [
     },
     {
       name: "Ir a foros",
-      link: "",
+      link: "/user/forum",
     },
     {
       name: "Cambiar de sistema",

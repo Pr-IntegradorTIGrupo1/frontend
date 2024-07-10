@@ -52,6 +52,9 @@ export const GET_DOCUMENT_BY_ID = gql`
                 content
 
             }
+            template{
+                id
+            }
         }
 }
 `
@@ -106,3 +109,13 @@ export const GET_DOCUMENT = gql`
     }
   }
 `;
+
+export const GET_FORUM_BY_DOCUMENT = gql`
+    query GetForumByDocument($id: String!) {
+        getForumsByDocument(id: $id) {
+            id
+            title
+            content
+            status
+        }
+}`;

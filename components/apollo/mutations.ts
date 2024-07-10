@@ -38,4 +38,16 @@ export const UPDATE_REQUIREMENT = gql`
       status
     }
   }
-`
+`;
+
+//FOROS
+export const CREATE_FORUM_MUTATION = gql`
+    mutation CreateForum($input: CreateForumInput!) {
+        createForum(input: $input ) {
+            id
+            title
+            content
+            status
+        }
+    }   
+`;
