@@ -13,7 +13,7 @@ const NavBar: React.FC<NavBarProps> = () => {
       <div className=" mx-auto px-4 md:px-6 flex items-center justify-between h-16">
       <div className="flex  items-center  ">
           <Image
-            src="/img/ucn-logo.png"
+            src="/img/logo-base.png"
             alt="ucn-logo"
             width={50}
             height={50}
