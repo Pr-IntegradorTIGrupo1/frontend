@@ -3,8 +3,8 @@ import { Document } from "@/interfaces/Document";
 import DataTable from "react-data-table-component";
 import { useRouter } from 'next/navigation'
 import { useQuery } from "@apollo/client";
-import { GET_ALL_DOCUMENTS_LAST_VERSION_QUERY } from "@/components/apollo/queries";
-import { useEffect } from 'react';
+import { GET_DOCUMENTS_BY_USER } from "@/components/apollo/queries";
+import { useEffect, useState } from 'react';
 
 
 const customStyles = {
@@ -29,7 +29,7 @@ const columns = [
         name: "Titulo",
         selector: (row: Document) => row.title,
         sortable: true,
-        width: "300px"
+        width: "250px"
     },
     {
         name: "fecha creacion",
@@ -47,15 +47,30 @@ const columns = [
         name: "Plantilla",
         selector: (row: Document) => row.template.title,
         sortable: true,
+        width: "150px"
+    },
+    {
+        name: "Proyecto",
+        selector: (row: Document) => row.project.name,
     }
+
 
 ];
 
 export default function DocumentsTable() {
-    const { data: dataDocuments, loading: loadingDocuments, error: errorDocuments, refetch } = useQuery(GET_ALL_DOCUMENTS_LAST_VERSION_QUERY)
+    const [userId, setUserId] = useState<number | null>(null);
+    const { data: dataDocuments, loading: loadingDocuments, error: errorDocuments, refetch } = useQuery(GET_DOCUMENTS_BY_USER,{
+        variables: { id_user: userId }
+    
+    })
     //console.log(dataDocuments)
 
     useEffect(() => {
+        const userData = localStorage.getItem('userData');
+        if (userData) {
+        const parsedUserData = JSON.parse(userData);
+        setUserId(parseInt(parsedUserData.id));
+        }
         refetch();
       }, [refetch]);
 
@@ -69,7 +84,7 @@ export default function DocumentsTable() {
             <DataTable
                 title="Documentos"
                 columns={columns}
-                data={dataDocuments?.getAllDocumentsLastVersion}
+                data={dataDocuments?.getDocumentsByUser || []}
                 pagination
                 onRowClicked={row => router.push(`/user/dashboard/document/${row.id}`)}
                 customStyles={customStyles}

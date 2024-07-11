@@ -157,3 +157,25 @@ export const GET_USER_BY_ID = gql`
         }
     }
 `;
+
+export const GET_DOCUMENTS_BY_USER = gql` 
+    query GetDocumentsByUser($id_user: Int!) {
+        getDocumentsByUser(id_user: $id_user) {
+            id
+            id_document
+            title
+            timestamp
+            read_only
+            is_active
+            template {
+                title
+            }
+            version {
+                version
+            }
+            project {
+                name
+            }
+        }
+    }
+`;
