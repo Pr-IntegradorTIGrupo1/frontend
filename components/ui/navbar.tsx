@@ -45,10 +45,10 @@ const NavBar: React.FC<NavBarProps> = () => {
             Servicios
           </Link>
           <Link
-            href="#"
+            href="/user/help"
             className="text-white hover:text-blue-500 transition-colors dark:text-gray-400 dark:hover:text-blue-500"
           >
-            Contacto
+            Ayuda
           </Link>
         </nav>
         <div className="flex items-center gap-4">
