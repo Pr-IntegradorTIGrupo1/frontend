@@ -48,7 +48,7 @@ type DocumentVersion = {
 
 const CreateNewVersion: React.FC = () => {
   const router = useRouter();
-
+  const [userId, setUserId] = useState<number | null>(null);
   const [version, setVersion] = useState<string>('');
   const [versionTitle, setVersionTitle] = useState<string>('');
   const [requirements, setRequirements] = useState<Requirement[]>([]);
@@ -62,6 +62,12 @@ const CreateNewVersion: React.FC = () => {
   const [updateDocument] = useMutation(UPDATE_DOCUMENT_MUTATION);
 
   useEffect(() => {
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      const parsedUserData = JSON.parse(userData);
+
+      setUserId(parseInt(parsedUserData.id));
+    }
     if (RequirementDocument) {
       setDocumento(RequirementDocument.getDocument);
       const { version, title, requirements } = RequirementDocument.getDocument;
@@ -91,16 +97,6 @@ const CreateNewVersion: React.FC = () => {
         id: req.index,
         content: req.content.filter(content => !content.disabled).map(content => `${content.key}: ${content.value}`)
       }));
-
-    const formData = {
-      id_document: documentId,
-      id_user: 1,
-      title: versionTitle,
-      content: JSON.stringify({ requirements: filteredRequirements }),
-      id_template: RequirementDocument?.getDocument.id_project
-    };
-
-    console.log('Form Data:', formData);
     
     // Aquí puedes enviar el formData al backend
     const confirmation = await Swal.fire({
@@ -118,7 +114,7 @@ const CreateNewVersion: React.FC = () => {
           variables: {
             input: {
               id_document: RequirementDocument?.getDocument.id,
-              id_user: 1,
+              id_user: userId,
               title: versionTitle,
               content: JSON.stringify({ requirements: filteredRequirements }),
               id_template: RequirementDocument?.getDocument.template.id,
