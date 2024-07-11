@@ -70,3 +70,19 @@ export const CREATE_COMMENT_MUTATION = gql`
         }
     }   
 `;
+export const VALIDATE_TOKEN_MUTATION = gql`
+    mutation ValidateToken($input: ValidateTokenInput!) {
+        validateToken(input: $input) {
+            id
+            firstName
+            lastName
+            email
+            rut
+            projects{
+                id
+                name
+            }
+            
+        }
+    }
+`;

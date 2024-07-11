@@ -53,7 +53,7 @@ const columns = [
 
 export default function DocumentsTable() {
     const { data: dataDocuments, loading: loadingDocuments, error: errorDocuments, refetch } = useQuery(GET_ALL_DOCUMENTS_LAST_VERSION_QUERY)
-    console.log(dataDocuments)
+    //console.log(dataDocuments)
 
     useEffect(() => {
         refetch();

@@ -4,19 +4,12 @@ import { Box, Button, FormControl, FormLabel, Input, VStack, IconButton, Text, S
 import { CloseIcon } from '@chakra-ui/icons';
 import { Formik, Field, Form, FieldArray, FormikErrors, FormikTouched } from 'formik';
 import * as Yup from 'yup';
-import { GET_ALL_TEMPLATES } from '../apollo/queries';
+import { GET_ALL_TEMPLATES, GET_USER_BY_ID } from '../apollo/queries';
 import { CREATE_DOCUMENT_MUTATION } from '../apollo/mutations';
 import { useQuery, useMutation } from '@apollo/client';
 import Swal from 'sweetalert2';
 import { Requirement, Fields, FormValues, Project, Template } from '@/interfaces/FormValues';
 import { useRouter } from 'next/navigation';
-
-const projects: Project[] = [
-  { id: '1', name: 'Proyecto 1' },
-  { id: '2', name: 'Proyecto 2' },
-  { id: '3', name: 'Proyecto 3' },
-  { id: '4', name: 'Proyecto 4' },
-];
 
 const validationSchema = Yup.object().shape({
   project: Yup.string().required('Debe seleccionar un proyecto.'),
@@ -36,15 +29,35 @@ const validationSchema = Yup.object().shape({
 const CreateRequirementForm: React.FC = () => {
   const [createDocument] = useMutation(CREATE_DOCUMENT_MUTATION);
   const [selectedProjectName, setSelectedProjectName] = useState<string>('');
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [selectedProjectId, setSelectedProjectId] = useState<number>(0);
   const [selectedTemplateName, setSelectedTemplateName] = useState<string>('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<number>(0);
   const [documentTitle, setDocumentTitle] = useState<string>('');
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [userProjects, setUserProjects] = useState<Project[]>([]);
 
   const router = useRouter();
   // Call API to fetch templates
-  const { data: dataTemplates, loading: loadingTemplates, error: templatesError, refetch } = useQuery(GET_ALL_TEMPLATES);
+  const { data: dataTemplates, loading: loadingTemplates, error: templatesError, refetch: refetchTemplates } = useQuery(GET_ALL_TEMPLATES);
+  const { refetch: refetchUserProjects } = useQuery(GET_USER_BY_ID, {
+    variables: { id: 1 },
+    skip: true, // Skip automatic execution, we'll refetch manually
+  });
+
+  useEffect(() => {
+    const userDataString = localStorage.getItem('userData');
+    const userData = userDataString ? JSON.parse(userDataString) : null;
+    const userIdString = userData ? userData.id : null;
+    const userIdInt = userIdString ? parseInt(userIdString) : null;
+
+    if (userIdInt) {
+      refetchUserProjects({ id: userIdInt }).then(response => {
+        if (response.data && response.data.getUser && response.data.getUser.projects) {
+          setUserProjects(response.data.getUser.projects);
+        }
+      });
+    }
+  }, [refetchUserProjects]);
 
   useEffect(() => {
     const checkTemplatesAndRedirect = async () => {
@@ -69,8 +82,8 @@ const CreateRequirementForm: React.FC = () => {
   }, [dataTemplates]);
 
   useEffect(() => {
-    refetch();
-  }, [refetch]);
+    refetchTemplates();
+  }, [refetchTemplates]);
 
   const initialValues: FormValues = {
     project: '',
@@ -109,13 +122,15 @@ const CreateRequirementForm: React.FC = () => {
       requirements: requirements
     };
 
-    const title = documentTitle; //1) title: String!
-    const content = JSON.stringify(formattedData); //2) content: String!
-    console.log(content);
-    
-    const id_user = 1; //3) Hardcoded user ID for now
-    const projectId = parseInt(selectedProjectId); //4) id_project: Int!
-    const templateId = selectedTemplateId; //5) id_template: Int!
+    const title = documentTitle;//1) title: String!
+    const content = JSON.stringify(formattedData);//2) content: String!
+    const userDataString = localStorage.getItem('userData');//obtiene los datos del usuario del localStorage
+    const userData = userDataString ? JSON.parse(userDataString) : null;//parsea los datos del usuario
+    const userIdString = userData ? userData.id : null;//obtiene el id del usuario
+    const userIdInt = userIdString ? parseInt(userIdString) : null;
+    const id_user = userIdInt;//3) id_user: Int!
+    const projectId = selectedProjectId;//4) id_project: Int!
+    const templateId = selectedTemplateId;//5) id_template: Int!
 
     const result = await Swal.fire({
       title: '¿Estas seguro?',
@@ -153,7 +168,6 @@ const CreateRequirementForm: React.FC = () => {
             'error'
           );
         }
-        console.log(data);
       } catch (error) {
         console.error("error al crear el Documento de requisitos", error);
         Swal.fire(
@@ -186,14 +200,18 @@ const CreateRequirementForm: React.FC = () => {
                   placeholder="Selecciona un proyecto"
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
                     setFieldValue('project', e.target.value);
-                    const project = projects.find(p => p.id === e.target.value);
+                    const projectId = parseInt((e.target.value));
+                    
+                    
+                    const project = userProjects.find(p => p.id === projectId);
+                    
                     if (project) {
                       setSelectedProjectName(project.name);
                       setSelectedProjectId(project.id);
                     }
                   }}
                 >
-                  {projects.map((proj) => (
+                  {userProjects.map((proj) => (
                     <option key={proj.id} value={proj.id}>
                       {proj.name}
                     </option>

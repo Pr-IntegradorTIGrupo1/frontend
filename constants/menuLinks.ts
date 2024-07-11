@@ -111,10 +111,7 @@ export const PatientMenuLinks = [
       name: "Mi cuenta",
       link: "/user/profile",
     },
-    {
-      name: "Salir",
-      link: "",
-    },
+    
     
   ];
 

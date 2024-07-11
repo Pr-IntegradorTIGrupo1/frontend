@@ -5,7 +5,7 @@ export interface Template {
   }
 
 export interface Project {
-    id: string;
+    id: number;
     name: string;
   }
 
