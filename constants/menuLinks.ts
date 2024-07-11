@@ -85,14 +85,13 @@ export const PatientMenuLinks = [
       name: "Ver documentos",
       link: "/user/dashboard",
     },
-    
-    {
-      name: "Crear nuevo documento",
-      link: "/user/requirement/new",
-    },
     {
       name: "Crear nueva plantilla",
       link: "/user/template/new",
+    },
+    {
+      name: "Crear nuevo documento",
+      link: "/user/requirement/new",
     },
     {
       name: "Versiones de Documentos",
@@ -102,11 +101,6 @@ export const PatientMenuLinks = [
       name: "Ir a foros",
       link: "/user/forum",
     },
-    {
-      name: "Cambiar de sistema",
-      link: "",
-    },
-    
     {
       name: "Mi cuenta",
       link: "/user/profile",
