@@ -52,6 +52,9 @@ export const GET_DOCUMENT_BY_ID = gql`
                 content
 
             }
+            template{
+                id
+            }
         }
 }
 `
@@ -106,3 +109,36 @@ export const GET_DOCUMENT = gql`
     }
   }
 `;
+
+// FOROS
+export const GET_FORUM_BY_DOCUMENT = gql`
+    query GetForumByDocument($id: String!) {
+        getForumsByDocument(id: $id) {
+            id
+            title
+            content
+            status
+        }
+}`;
+
+export const GET_FORUM_BY_ID = gql`
+    query GetForumById($id: Int!) {
+        getForum(id: $id) {
+            id
+            title
+            content
+            status
+        }
+}`;
+
+//COMENTARIOS
+
+export const GET_COMMENTS_BY_FORUM = gql`
+    query GetCommentsByForum($id: Int!) {
+        getCommentsByForum(id: $id) {
+            id
+            content
+        }
+    }
+`;
+

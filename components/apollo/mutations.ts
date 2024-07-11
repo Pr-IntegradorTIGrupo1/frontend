@@ -38,4 +38,35 @@ export const UPDATE_REQUIREMENT = gql`
       status
     }
   }
-`
+`;
+
+export const DELETE_DOCUMENT_MUTATION = gql`
+  mutation DeleteRequirement($id: Int!) {
+    deleteDocument(id: $id) {
+      success
+      message
+    }
+  }
+`;
+
+//FOROS
+export const CREATE_FORUM_MUTATION = gql`
+    mutation CreateForum($input: CreateForumInput!) {
+        createForum(input: $input ) {
+            id
+            title
+            content
+            status
+        }
+    }   
+`;
+
+//COMENTARIOS
+export const CREATE_COMMENT_MUTATION = gql`
+    mutation CreateComment($input: CreateCommentInput!) {
+        createComment(input: $input ) {
+            id
+            content
+        }
+    }   
+`;

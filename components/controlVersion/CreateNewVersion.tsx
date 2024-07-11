@@ -8,6 +8,7 @@ import { usePathname, useRouter } from 'next/navigation';
 
 import Swal from 'sweetalert2';
 import { UPDATE_DOCUMENT_MUTATION } from '../apollo/mutations';
+import { Template } from '../../interfaces/FormValues';
 
 interface RequirementContent {
   key: string;
@@ -37,6 +38,7 @@ type Document = {
     content: string;
   }[];
   version: DocumentVersion;
+  template: Template;
 };
 
 type DocumentVersion = {
@@ -119,7 +121,7 @@ const CreateNewVersion: React.FC = () => {
               id_user: 1,
               title: versionTitle,
               content: JSON.stringify({ requirements: filteredRequirements }),
-              id_template: RequirementDocument?.getDocument.id_project
+              id_template: RequirementDocument?.getDocument.template.id,
             }
           }
         });
@@ -129,7 +131,9 @@ const CreateNewVersion: React.FC = () => {
             'Se ha creado una nueva versión del Documento de requisitos.',
             'success'
           );
-          router.push(`/user/versionControl/${documentId+1}/newVersion`)
+          console.log(data);
+          
+          router.push(`/user/versionControl/`)
         }else{
           console.error("error al actualizar el Documento de requisitos", errors);
           Swal.fire(
