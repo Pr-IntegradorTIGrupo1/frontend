@@ -131,7 +131,9 @@ const CreateNewVersion: React.FC = () => {
             'Se ha creado una nueva versión del Documento de requisitos.',
             'success'
           );
-          router.push(`/user/versionControl/${documentId+1}/newVersion`)
+          console.log(data);
+          
+          router.push(`/user/versionControl/`)
         }else{
           console.error("error al actualizar el Documento de requisitos", errors);
           Swal.fire(

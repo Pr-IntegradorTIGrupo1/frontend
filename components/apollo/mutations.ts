@@ -40,6 +40,15 @@ export const UPDATE_REQUIREMENT = gql`
   }
 `;
 
+export const DELETE_DOCUMENT_MUTATION = gql`
+  mutation DeleteRequirement($id: Int!) {
+    deleteDocument(id: $id) {
+      success
+      message
+    }
+  }
+`;
+
 //FOROS
 export const CREATE_FORUM_MUTATION = gql`
     mutation CreateForum($input: CreateForumInput!) {

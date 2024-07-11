@@ -3,11 +3,13 @@ import { useEffect, useState } from 'react';
 import { Box, FormControl, FormLabel, Input, VStack, Text, Center, Select, Button, Icon, Flex, HStack, Tooltip } from '@chakra-ui/react';
 import { AddIcon, DeleteIcon, DownloadIcon } from '@chakra-ui/icons';
 import { GET_ALL_VERSIONS_BY_DOCUMENT, GET_DOCUMENT_BY_ID } from '../apollo/queries';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import {DELETE_DOCUMENT_MUTATION } from '../apollo/mutations';
+import Swal from 'sweetalert2';
 
 // Define the types for the document and requirements
 type Requirement = {
@@ -47,6 +49,9 @@ const VersionDetail: React.FC = () => {
 
   const { data: VersionsDocument, loading: loadingVersions, error: versionsError } = 
         useQuery(GET_ALL_VERSIONS_BY_DOCUMENT, { variables: { id_document: documentId } });
+  
+  const [deleteDocument] = useMutation(DELETE_DOCUMENT_MUTATION);
+
 
   const [documento, setDocumento] = useState<Document | null>(null);
 
@@ -126,9 +131,55 @@ const VersionDetail: React.FC = () => {
     router.push(`/user/versionControl/${lastVersion}/newVersion`);
   };
 
-  const handleDeleteVersion = () => {
+  const handleDeleteVersion = async() => {
     console.log("Eliminar versión");
+    console.log("eliminar versión:", documentId);
+    
     // Lógica para eliminar la versión
+    const confirmation = await Swal.fire({
+      title: '¿Estas seguro?',
+      text: "¿Estás seguro de que deseas eliminar esta versión?",
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, confirmar',
+      cancelButtonText: 'Cancelar',
+      backdrop: true
+    });
+
+    if (confirmation.isConfirmed) {
+      try {
+        const { data, errors } = await deleteDocument({
+          variables: {
+            id: documentId
+          }
+        });
+        if (data?.deleteDocument) {
+          Swal.fire(
+            'Versión eliminada', 
+            'La versión ha sido eliminada exitosamente.',
+            'success'
+          );
+          setTimeout(() => {
+            router.push(`/user/versionControl/`);
+            
+          }, 2000);
+        } else {
+          console.error("error al eliminar la versión", errors);
+          Swal.fire(
+            'Error',
+            'Hubo un error al eliminar la versión.',
+            'error'
+          );
+        }
+      } catch (error) {
+        console.error("error al eliminar la versión", error);
+        Swal.fire(
+          'Error',
+          'Hubo un error al eliminar la versión.',
+          'error'
+        );
+      }
+    }
   };
 
   return (
