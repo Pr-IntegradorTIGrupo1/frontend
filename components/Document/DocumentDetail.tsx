@@ -12,7 +12,7 @@ type Requirement = {
   id: number;
   content: string;
   status: boolean;
-}
+};
 
 const DocumentDetail = () => {
   const router = useRouter()
@@ -22,9 +22,9 @@ const DocumentDetail = () => {
 
   const { loading, error, data } = useQuery(GET_DOCUMENT, {
     variables: { id: documentId },
-  })
+  });
 
-  const [updateRequirement] = useMutation(UPDATE_REQUIREMENT)
+  const [updateRequirement] = useMutation(UPDATE_REQUIREMENT);
 
   const handleStateChange = async (id: number, status: boolean, timestamp: string) => {
     try {
@@ -32,26 +32,30 @@ const DocumentDetail = () => {
         variables: {
           input: {
             id,
-            status
-          }
+            status,
+          },
         },
         optimisticResponse: {
           updateRequirement: {
             id,
             status,
-            __typename: 'Requirement'
-          }
+            __typename: "Requirement",
+          },
         },
         update: (cache, { data: { updateRequirement } }) => {
           const existingDocument = cache.readQuery<any>({
             query: GET_DOCUMENT,
-            variables: { id: documentId }
-          })
+            variables: { id: documentId },
+          });
 
           if (existingDocument) {
-            const updatedRequirements = existingDocument.getDocument.requirements.map(
-              (req: Requirement) => req.id === updateRequirement.id ? { ...req, status: updateRequirement.status } : req
-            )
+            const updatedRequirements =
+              existingDocument.getDocument.requirements.map(
+                (req: Requirement) =>
+                  req.id === updateRequirement.id
+                    ? { ...req, status: updateRequirement.status }
+                    : req
+              );
 
             cache.writeQuery({
               query: GET_DOCUMENT,
@@ -59,10 +63,10 @@ const DocumentDetail = () => {
               data: {
                 getDocument: {
                   ...existingDocument.getDocument,
-                  requirements: updatedRequirements
-                }
-              }
-            })
+                  requirements: updatedRequirements,
+                },
+              },
+            });
           }
         }
       })
@@ -78,31 +82,33 @@ const DocumentDetail = () => {
         setShowModal(true);
       }
     } catch (error) {
-      console.error('Error updating requirement:', error)
+      console.error("Error updating requirement:", error);
     }
-  }
+  };
 
   const parseContent = (content: string) => {
     try {
       const parsedContent = JSON.parse(content);
       if (Array.isArray(parsedContent.content)) {
-        return parsedContent.content.join('\n');
+        return parsedContent.content.join("\n");
       }
       return parsedContent.content.toString();
     } catch (e) {
-      console.error('Error parsing content:', e);
+      console.error("Error parsing content:", e);
       return content;
     }
-  }
+  };
 
-  if (loading) return <div>Cargando...</div>
-  if (error) return <div>Error: {error.message}</div>
+  if (loading) return <div>Cargando...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   const { title, requirements, timestamp } = data.getDocument
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Detalle del Documento: {title}</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        Detalle del Documento: {title}
+      </h1>
       <div className="space-y-4">
         {requirements.map((requirement: Requirement) => (
           <div key={requirement.id} className="bg-white shadow-md rounded-lg p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center w-full">
@@ -112,9 +118,7 @@ const DocumentDetail = () => {
                 {parseContent(requirement.content)}
               </span>
               <Link href={`/user/versionControl/${documentId}/newVersion`}>
-                <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center"
-                >
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors flex items-center mr-2">
                   <PencilIcon className="h-5 w-5" />
                 </button>
               </Link>
@@ -130,7 +134,9 @@ const DocumentDetail = () => {
               >
                 <span className="sr-only">Toggle State</span>
                 <span
-                  className={`${requirement.status ? 'translate-x-6' : 'translate-x-1'} inline-block h-4 w-4 transform bg-white rounded-full transition`}
+                  className={`${
+                    requirement.status ? "translate-x-6" : "translate-x-1"
+                  } inline-block h-4 w-4 transform bg-white rounded-full transition`}
                 />
               </Switch>
             </div>
@@ -152,7 +158,7 @@ const DocumentDetail = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default DocumentDetail
+export default DocumentDetail;

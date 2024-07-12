@@ -1,15 +1,32 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { Box, FormControl, FormLabel, Input, VStack, Text, Center, Select, Button, Icon, Flex, HStack, Tooltip } from '@chakra-ui/react';
-import { AddIcon, DeleteIcon, DownloadIcon } from '@chakra-ui/icons';
-import { GET_ALL_VERSIONS_BY_DOCUMENT, GET_DOCUMENT_BY_ID } from '../apollo/queries';
-import { useMutation, useQuery } from '@apollo/client';
-import { useRouter } from 'next/navigation';
-import { usePathname } from 'next/navigation';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import {DELETE_DOCUMENT_MUTATION } from '../apollo/mutations';
-import Swal from 'sweetalert2';
+"use client";
+import { useEffect, useState } from "react";
+import {
+  Box,
+  FormControl,
+  FormLabel,
+  Input,
+  VStack,
+  Text,
+  Center,
+  Select,
+  Button,
+  Icon,
+  Flex,
+  HStack,
+  Tooltip,
+} from "@chakra-ui/react";
+import { AddIcon, DeleteIcon, DownloadIcon } from "@chakra-ui/icons";
+import {
+  GET_ALL_VERSIONS_BY_DOCUMENT,
+  GET_DOCUMENT_BY_ID,
+} from "../apollo/queries";
+import { useMutation, useQuery } from "@apollo/client";
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { DELETE_DOCUMENT_MUTATION } from "../apollo/mutations";
+import Swal from "sweetalert2";
 
 // Define the types for the document and requirements
 type Requirement = {
@@ -37,21 +54,28 @@ type Document = {
 };
 
 const VersionDetail: React.FC = () => {
-  const documentId = parseInt(usePathname().split('/')[3]);
+  const documentId = parseInt(usePathname().split("/")[3]);
 
   const [versions, setVersions] = useState<DocumentVersion[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<number | undefined>(); // Estado para la versión seleccionada
   const [lastVersion, setLastVersion] = useState<number | undefined>(); // Estado para la última versión
 
   // Gestion de documento en la vista
-  const { data: RequirementDocument, loading: loadingDocument, error: documentError } = 
-        useQuery(GET_DOCUMENT_BY_ID, { variables: { id: documentId } });
+  const {
+    data: RequirementDocument,
+    loading: loadingDocument,
+    error: documentError,
+  } = useQuery(GET_DOCUMENT_BY_ID, { variables: { id: documentId } });
 
-  const { data: VersionsDocument, loading: loadingVersions, error: versionsError } = 
-        useQuery(GET_ALL_VERSIONS_BY_DOCUMENT, { variables: { id_document: documentId } });
-  
+  const {
+    data: VersionsDocument,
+    loading: loadingVersions,
+    error: versionsError,
+  } = useQuery(GET_ALL_VERSIONS_BY_DOCUMENT, {
+    variables: { id_document: documentId },
+  });
+
   const [deleteDocument] = useMutation(DELETE_DOCUMENT_MUTATION);
-
 
   const [documento, setDocumento] = useState<Document | null>(null);
 
@@ -62,21 +86,29 @@ const VersionDetail: React.FC = () => {
     }
     if (VersionsDocument) {
       console.log(VersionsDocument);
-      const versionsData: DocumentVersion[] = VersionsDocument.getAllDocumentsVersions.map((item: { id: number, version: { version: number, last_version: boolean } }) => ({
-        id: item.id,
-        version: item.version.version,
-        last_version: item.version.last_version
-      }));
+      const versionsData: DocumentVersion[] =
+        VersionsDocument.getAllDocumentsVersions.map(
+          (item: {
+            id: number;
+            version: { version: number; last_version: boolean };
+          }) => ({
+            id: item.id,
+            version: item.version.version,
+            last_version: item.version.last_version,
+          })
+        );
       setVersions(versionsData);
 
       // Encontrar y establecer la última versión
-      const lastVersionData = versionsData.find(v => v.last_version === true);
+      const lastVersionData = versionsData.find((v) => v.last_version === true);
       if (lastVersionData) {
         setLastVersion(lastVersionData.id);
       }
 
       if (RequirementDocument) {
-        const initialVersion = versionsData.find(v => v.version === RequirementDocument.getDocument.version.version);
+        const initialVersion = versionsData.find(
+          (v) => v.version === RequirementDocument.getDocument.version.version
+        );
         if (initialVersion) {
           setSelectedVersion(initialVersion.version);
         }
@@ -89,38 +121,44 @@ const VersionDetail: React.FC = () => {
   const handleVersionChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedVersion = parseInt(event.target.value);
     setSelectedVersion(selectedVersion);
-    const selectedVersionData = versions.find(version => version.version === selectedVersion);
+    const selectedVersionData = versions.find(
+      (version) => version.version === selectedVersion
+    );
     if (selectedVersionData) {
-      router.push(`/user/versionControl/${selectedVersionData.id}/versionDetail`);
+      router.push(
+        `/user/versionControl/${selectedVersionData.id}/versionDetail`
+      );
     }
   };
 
   const handleExportPDF = () => {
-    const input = document.getElementById('pdfContent');
+    const input = document.getElementById("pdfContent");
     if (input) {
-      html2canvas(input).then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210;
-        const pageHeight = 295;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
+      html2canvas(input)
+        .then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
+          const pdf = new jsPDF("p", "mm", "a4");
+          const imgWidth = 210;
+          const pageHeight = 295;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          let heightLeft = imgHeight;
+          let position = 0;
 
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        while (heightLeft >= 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
           heightLeft -= pageHeight;
-        }
 
-        pdf.save('documento.pdf');
-      }).catch((err) => {
-        console.error('Error generating PDF', err);
-      });
+          while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+          }
+
+          pdf.save("documento.pdf");
+        })
+        .catch((err) => {
+          console.error("Error generating PDF", err);
+        });
     } else {
       console.error('El elemento con id "pdfContent" no fue encontrado.');
     }
@@ -131,53 +169,44 @@ const VersionDetail: React.FC = () => {
     router.push(`/user/versionControl/${lastVersion}/newVersion`);
   };
 
-  const handleDeleteVersion = async() => {
+  const handleDeleteVersion = async () => {
     console.log("Eliminar versión");
     console.log("eliminar versión:", documentId);
-    
+
     // Lógica para eliminar la versión
     const confirmation = await Swal.fire({
-      title: '¿Estas seguro?',
+      title: "¿Estas seguro?",
       text: "¿Estás seguro de que deseas eliminar esta versión?",
-      icon: 'question',
+      icon: "question",
       showCancelButton: true,
-      confirmButtonText: 'Sí, confirmar',
-      cancelButtonText: 'Cancelar',
-      backdrop: true
+      confirmButtonText: "Sí, confirmar",
+      cancelButtonText: "Cancelar",
+      backdrop: true,
     });
 
     if (confirmation.isConfirmed) {
       try {
         const { data, errors } = await deleteDocument({
           variables: {
-            id: documentId
-          }
+            id: documentId,
+          },
         });
         if (data?.deleteDocument) {
           Swal.fire(
-            'Versión eliminada', 
-            'La versión ha sido eliminada exitosamente.',
-            'success'
+            "Versión eliminada",
+            "La versión ha sido eliminada exitosamente.",
+            "success"
           );
           setTimeout(() => {
             router.push(`/user/versionControl/`);
-            
           }, 2000);
         } else {
           console.error("error al eliminar la versión", errors);
-          Swal.fire(
-            'Error',
-            'Hubo un error al eliminar la versión.',
-            'error'
-          );
+          Swal.fire("Error", "Hubo un error al eliminar la versión.", "error");
         }
       } catch (error) {
         console.error("error al eliminar la versión", error);
-        Swal.fire(
-          'Error',
-          'Hubo un error al eliminar la versión.',
-          'error'
-        );
+        Swal.fire("Error", "Hubo un error al eliminar la versión.", "error");
       }
     }
   };
@@ -185,33 +214,63 @@ const VersionDetail: React.FC = () => {
   return (
     <Center>
       <Box width="800px">
-        <Box p={5} borderWidth={1} borderRadius={5} boxShadow="lg" id="pdfContent">
+        <Box
+          p={5}
+          borderWidth={1}
+          borderRadius={5}
+          boxShadow="lg"
+          id="pdfContent"
+        >
           <VStack spacing={4} align="stretch">
             <HStack justify="space-between" align="center">
               <FormControl width="30%">
                 <FormLabel>Versiones</FormLabel>
                 <Select value={selectedVersion} onChange={handleVersionChange}>
                   {versions.map((version, index) => (
-                    <option key={index} value={version.version}>{version.version}</option>
+                    <option key={index} value={version.version}>
+                      {version.version}
+                    </option>
                   ))}
                 </Select>
               </FormControl>
 
-              <Box position={'relative'} top={-25} right={0}>
-                <Tooltip label="Exportar a PDF" placement="top" fontSize={'md'}>
-                  <Button colorScheme="gray" size="sm" mr={2} onClick={handleExportPDF}>
+              <Box position={"relative"} top={-25} right={0}>
+                <Tooltip label="Exportar a PDF" placement="top" fontSize={"md"}>
+                  <Button
+                    colorScheme="gray"
+                    size="sm"
+                    mr={2}
+                    onClick={handleExportPDF}
+                  >
                     <Icon as={DownloadIcon} />
                   </Button>
                 </Tooltip>
 
-                <Tooltip label="Crear nueva versión" placement="top" fontSize={'md'}>
-                  <Button colorScheme="green" size="sm" mr={2} onClick={handleCreateVersion}>
+                <Tooltip
+                  label="Crear nueva versión"
+                  placement="top"
+                  fontSize={"md"}
+                >
+                  <Button
+                    colorScheme="green"
+                    size="sm"
+                    mr={2}
+                    onClick={handleCreateVersion}
+                  >
                     <Icon as={AddIcon} />
                   </Button>
                 </Tooltip>
 
-                <Tooltip label="Eliminar versión" placement="top" fontSize={'md'}>
-                  <Button colorScheme="red" size="sm" onClick={handleDeleteVersion}>
+                <Tooltip
+                  label="Eliminar versión"
+                  placement="top"
+                  fontSize={"md"}
+                >
+                  <Button
+                    colorScheme="red"
+                    size="sm"
+                    onClick={handleDeleteVersion}
+                  >
                     <Icon as={DeleteIcon} />
                   </Button>
                 </Tooltip>
@@ -221,16 +280,20 @@ const VersionDetail: React.FC = () => {
               <>
                 <FormControl>
                   <FormLabel>Título de Documento</FormLabel>
-                  <Input
-                    value={documento.title}
-                    readOnly
-                  />
-                  <Text>Versión: {documento.version.version}</Text>
+                  <Input value={documento.title} readOnly />
                 </FormControl>
                 {documento.requirements.map((requirement, reqIndex) => {
                   const parsedContent = JSON.parse(requirement.content);
                   return (
-                    <Box key={reqIndex} position="relative" borderWidth={1} borderRadius={5} p={4} boxShadow="sm" bg='white'>
+                    <Box
+                      key={reqIndex}
+                      position="relative"
+                      borderWidth={1}
+                      borderRadius={5}
+                      p={4}
+                      boxShadow="sm"
+                      bg="white"
+                    >
                       <Text
                         position="absolute"
                         top={2}
@@ -244,25 +307,31 @@ const VersionDetail: React.FC = () => {
                       </Text>
                       <Box mt={4} p={4}>
                         <VStack spacing={4} align="stretch">
-                          {parsedContent.content.map((item: string, contentIndex: number) => (
-                            <Box key={contentIndex} position="relative" mt={4}>
-                              <FormControl>
-                                <Input
-                                  value={item.split(': ')[0].trim()}
-                                  readOnly
-                                  placeholder="Etiqueta"
-                                  variant='flushed'
-                                  width="40%"
-                                />
-                                <Input
-                                  value={item.split(': ')[1].trim()}
-                                  readOnly
-                                  placeholder="Valor"
-                                  mt={5}
-                                />
-                              </FormControl>
-                            </Box>
-                          ))}
+                          {parsedContent.content.map(
+                            (item: string, contentIndex: number) => (
+                              <Box
+                                key={contentIndex}
+                                position="relative"
+                                mt={4}
+                              >
+                                <FormControl>
+                                  <Input
+                                    value={item.split(": ")[0].trim()}
+                                    readOnly
+                                    placeholder="Etiqueta"
+                                    variant="flushed"
+                                    width="40%"
+                                  />
+                                  <Input
+                                    value={item.split(": ")[1].trim()}
+                                    readOnly
+                                    placeholder="Valor"
+                                    mt={5}
+                                  />
+                                </FormControl>
+                              </Box>
+                            )
+                          )}
                         </VStack>
                       </Box>
                     </Box>
