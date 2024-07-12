@@ -102,6 +102,7 @@ export const GET_DOCUMENT = gql`
     getDocument(id: $id) {
       id
       title
+      timestamp
       requirements {
         id
         content
